@@ -16,6 +16,8 @@ namespace Blog.Data.Entities
         public bool Published { get; set; }
 
         public int View { get; set; }
+
+        public string Thumbnail { get; set; }
         
 
         public DateTime CreatedAt { get; set; }

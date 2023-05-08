@@ -1,3 +1,6 @@
+using Blog.Application.Catalog.CategoryService;
+using Blog.Application.Catalog.PostService;
+using Blog.Application.Common.FileStorageService;
 using Blog.Data.EF;
 using Blog.Data.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -13,9 +16,22 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BlogDb"));
 });
 
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 builder.Services.AddIdentity<UserApplication, IdentityRole>()
     .AddEntityFrameworkStores<BlogDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+
+    options.User.AllowedUserNameCharacters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+});
 
 var app = builder.Build();
 
@@ -34,17 +50,18 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-      name: "areas",
-      pattern: "Admin/{controller=Home}/{action=Index}/{id?}"
-    );
-});
+app.UseAuthorization();
 
 
 app.MapControllerRoute(
+      name: "Admin",
+      pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+
+app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+    );
+
 
 app.Run();

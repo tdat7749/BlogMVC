@@ -1,4 +1,5 @@
-﻿using Blog.WebApp.Models;
+﻿using Blog.Application.Common.FileStorageService;
+using Blog.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,11 +7,11 @@ namespace Blog.WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IFileStorageService _fileStorageService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IFileStorageService fileStorageService)
         {
-            _logger = logger;
+            _fileStorageService = fileStorageService;
         }
 
         public IActionResult Index()
@@ -21,6 +22,26 @@ namespace Blog.WebApp.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult UploadExplorer()
+        {
+            var dir = _fileStorageService.FileExplorer();
+            ViewBag.DirInfo = dir.GetFiles();
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult UploadImage(IFormFile upload)
+        {
+            var result = _fileStorageService.UploadImageAsync(upload);
+            if(result == false)
+            {
+                return new JsonResult(new { success = false, message = "Failed" });
+            }
+            return new JsonResult(new { success = true, message = "Success" });
+
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -21,6 +21,7 @@ namespace Blog.Data.Configuration
             builder.Property(x => x.View).HasDefaultValue(0);
             builder.Property(x => x.CreatedAt).HasDefaultValue(DateTime.UtcNow);
             builder.Property(x => x.UpdatedAt).HasDefaultValue(DateTime.UtcNow);
+            builder.Property(x => x.Body).IsRequired();
 
             builder.HasOne(x => x.Category).WithMany(x => x.Posts).HasForeignKey(x => x.CategoryId);
             builder.HasOne(x => x.User).WithMany(x => x.Posts).HasForeignKey(x => x.UserId);

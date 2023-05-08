@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Blog.ViewModel.Catalog.Tag.abc
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -6,3 +7,23 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+    <form asp-action="UploadImage" asp-controller="Home" method="post">
+        <div class="form-group">
+            <label asp-for="file">Hinh anh</label>
+            <textarea asp-for="file" class="form-control" id="abc"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+
+
+@section Scripts{
+    <script src="~/ckeditor/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('abc', {
+                filebrowserUploadUrl: '/Home/UploadImage',
+                filebrowserBrowseUrl: '/Home/UploadExplorer'
+            })
+    </script>
+}
