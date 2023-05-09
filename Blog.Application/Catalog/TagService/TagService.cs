@@ -20,10 +20,47 @@ namespace Blog.Application.Catalog.TagService
         {
             _context = context;
         }
-        public async Task<bool> CreateTag(CreateTagModel model)
+
+        public async Task<JsonResponse> ChangeStatus(UpdateTagStatusModel model)
         {
             try
             {
+                var tag = await _context.Tags.FindAsync(model.Id);
+                if (tag == null) return new JsonResponse()
+                {
+                    Message = $"Không tồn tại tag với ID = {model.Id}",
+                    Success = false
+                };
+
+                tag.Status = model.Status;
+
+                _context.Tags.Update(tag);
+                await _context.SaveChangesAsync();
+                return new JsonResponse()
+                {
+                    Message = "Đổi trạng thái thành công",
+                    Success = true
+                };
+            }
+            catch (Exception)
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<JsonResponse> CreateTag(CreateTagModel model)
+        {
+            try
+            {
+                var checkSlugTag = await _context.Tags.FirstOrDefaultAsync(x => x.Slug == model.Slug);
+                if (checkSlugTag != null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Slug = {model.Slug} đã tồn tại",
+                        Success = false
+                    };
+                }
                 var tag = new Tag()
                 {
                     Name = model.Name,
@@ -34,7 +71,12 @@ namespace Blog.Application.Catalog.TagService
                 };
 
                 _context.Tags.Add(tag);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+                return new JsonResponse()
+                {
+                    Message = "Tạo mới thành công",
+                    Success = true
+                };
             }
             catch (Exception)
             {
@@ -42,15 +84,27 @@ namespace Blog.Application.Catalog.TagService
             }
         }
 
-        public async Task<bool> DeleteTag(int id)
+        public async Task<JsonResponse> DeleteTag(int id)
         {
             try
             {
                 var tag = await _context.Tags.FindAsync(id);
-                if (tag == null) return false;
+                if (tag == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Không tồn tại tag với Id = {id}",
+                        Success = false
+                    };
+                }
 
                 _context.Tags.Remove(tag);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+                return new JsonResponse()
+                {
+                    Message = "Xóa thành công",
+                    Success = true
+                };
             }
             catch(Exception)
             {
@@ -79,8 +133,8 @@ namespace Blog.Application.Catalog.TagService
         {
 
             int TotalPage, TotalRecord;
-            var query = from c in _context.Tags
-                        select c;
+            var query = from t in _context.Tags
+                        select t;
 
 
 
@@ -94,7 +148,7 @@ namespace Blog.Application.Catalog.TagService
             query = query.Skip(request.PageSize * (request.PageIndex - 1)).Take(request.PageSize);
 
 
-            TotalPage = (int)Math.Ceiling((double)TotalRecord / query.Count());
+            TotalPage = (int)Math.Ceiling((double)TotalRecord / request.PageSize);
 
             var result = await query.Select(x => new TagVm()
             {
@@ -112,12 +166,44 @@ namespace Blog.Application.Catalog.TagService
             };
         }
 
-        public async Task<bool> UpdateTag(UpdateTagModel model)
+        public async Task<Tag> GetTag(int id)
+        {
+            try
+            {
+                var tag = await _context.Tags.FindAsync(id);
+                if (tag == null) return null;
+
+                return tag;
+            }
+            catch (Exception)
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<JsonResponse> UpdateTag(UpdateTagModel model)
         {
             try
             {
                 var tag = await _context.Tags.FindAsync(model.Id);
-                if (tag == null) return false;
+                if (tag == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Không tồn tại tag với Id = {model.Id}",
+                        Success = false
+                    };
+                }
+
+                var checkSlugTag = await _context.Tags.FirstOrDefaultAsync(x => x.Slug == model.Slug);
+                if (checkSlugTag != null && checkSlugTag != tag)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Slug = {model.Slug} đã tồn tại",
+                        Success = false
+                    };
+                }
 
                 tag.Slug = model.Slug;
                 tag.Status = model.Status;
@@ -126,7 +212,13 @@ namespace Blog.Application.Catalog.TagService
 
                 _context.Tags.Update(tag);
 
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+
+                return new JsonResponse()
+                {
+                    Message = "Cập nhật thành công",
+                    Success = true
+                };
 
             }
             catch (Exception)

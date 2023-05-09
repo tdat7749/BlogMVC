@@ -25,6 +25,7 @@ namespace Blog.WebApp.Areas.Admin.Controllers
         public async Task<IActionResult> GetAllCategories([FromBody] PagingRequest request)
         {
             var result = await _categoryService.GetAllCategories(request);
+
             return new JsonResult(result);
         }
 
@@ -38,19 +39,24 @@ namespace Blog.WebApp.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCategoryModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
             var result = await _categoryService.CreateCategory(model);
-            if (result == false) return new JsonResult(new { message = "Slug đã tồn tại", success = false });
-
-            return new JsonResult(new { message = "Tạo mới thành công !", success = true });
+            return new JsonResult(result);
         }
 
         [HttpPatch]
         public async Task<IActionResult> ChangeStatus([FromBody] UpdateCategoryStatusModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
             var result = await _categoryService.ChangeStatus(model);
-            if(result == false) return new JsonResult(new { message = "ID danh mục này không tồn tại", success = false });
 
-            return new JsonResult(new { message = "Cập nhật trạng thái thành công !", success = true });
+            return new JsonResult(result);
 
         }
 
@@ -61,34 +67,28 @@ namespace Blog.WebApp.Areas.Admin.Controllers
             return View(category);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit([FromForm]UpdateCategoryModel model)
+        [HttpPut]
+        public async Task<IActionResult> Edit([FromBody]UpdateCategoryModel model)
         {
             if (!ModelState.IsValid)
             {
-                var category = new Category()
-                {
-                    Id = model.Id,
-                    Slug = model.Slug,
-                    Name = model.Name,
-                    Status = model.Status
-                };
-                return View(category);
+                return View();
             }
             var result = await _categoryService.UpdateCategory(model);
-            if(result == false) return BadRequest();
-
-            return RedirectToAction("Index","Category");
+            return new JsonResult(result);
         }
 
 
         [HttpDelete]
         public async Task<IActionResult> Delete([FromBody] int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
             var result = await _categoryService.DeleteCategory(id);
-            if (result == false) return new JsonResult(new { message = $"Không tồn tại mã = {id}", success = false });
 
-            return new JsonResult(new { message = "Xóa thành công !", success = true });
+            return new JsonResult(result);
         }
     }
 }

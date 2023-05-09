@@ -1,5 +1,6 @@
 using Blog.Application.Catalog.CategoryService;
 using Blog.Application.Catalog.PostService;
+using Blog.Application.Catalog.TagService;
 using Blog.Application.Common.FileStorageService;
 using Blog.Data.EF;
 using Blog.Data.Entities;
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITagService, TagService>();
 
 builder.Services.AddIdentity<UserApplication, IdentityRole>()
     .AddEntityFrameworkStores<BlogDbContext>()
@@ -48,9 +50,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();
 
 app.UseAuthorization();
+
 
 
 app.MapControllerRoute(

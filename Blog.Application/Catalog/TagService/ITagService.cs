@@ -1,4 +1,5 @@
-﻿using Blog.ViewModel.Catalog.Tag;
+﻿using Blog.Data.Entities;
+using Blog.ViewModel.Catalog.Tag;
 using Blog.ViewModel.Common;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,13 @@ namespace Blog.Application.Catalog.TagService
     {
         //ADMIN
         Task<PagingResponse<List<TagVm>>> GetAllTags(PagingRequest request);
-        Task<bool> UpdateTag(UpdateTagModel model);
-        Task<bool> CreateTag(CreateTagModel model);
-        Task<bool> DeleteTag(int id);
+        Task<JsonResponse> UpdateTag(UpdateTagModel model);
+        Task<JsonResponse> CreateTag(CreateTagModel model);
+        Task<JsonResponse> DeleteTag(int id);
+
+        Task<JsonResponse> ChangeStatus(UpdateTagStatusModel model);
+
+        Task<Tag> GetTag(int id);
 
         // Client
         Task<List<TagVm>> GetAllPublicTags();

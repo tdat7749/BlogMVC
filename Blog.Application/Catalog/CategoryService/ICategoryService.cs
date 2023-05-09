@@ -15,11 +15,11 @@ namespace Blog.Application.Catalog.CategoryService
         // for ADMIN
 
         Task<PagingResponse<List<CategoryVm>>> GetAllCategories(PagingRequest request);
-        Task<bool> CreateCategory(CreateCategoryModel model);
-        Task<bool> UpdateCategory(UpdateCategoryModel model);
-        Task<bool> DeleteCategory(int id);
+        Task<JsonResponse> CreateCategory(CreateCategoryModel model);
+        Task<JsonResponse> UpdateCategory(UpdateCategoryModel model);
+        Task<JsonResponse> DeleteCategory(int id);
 
-        Task<bool> ChangeStatus(UpdateCategoryStatusModel model);
+        Task<JsonResponse> ChangeStatus(UpdateCategoryStatusModel model);
 
         Task<Category> GetCategory(int id);
 

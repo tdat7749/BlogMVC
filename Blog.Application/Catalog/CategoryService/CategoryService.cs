@@ -20,17 +20,26 @@ namespace Blog.Application.Catalog.CategoryService
             _context = context;
         }
 
-        public async Task<bool> ChangeStatus(UpdateCategoryStatusModel model)
+        public async Task<JsonResponse> ChangeStatus(UpdateCategoryStatusModel model)
         {
             try
             {
                 var category = await _context.Categories.FindAsync(model.Id);
-                if (category == null) return false;
+                if (category == null) return new JsonResponse()
+                {
+                    Message = $"Không tồn tại danh mục với ID = {model.Id}",
+                    Success = false
+                };
 
                 category.Status = model.Status;
 
                 _context.Categories.Update(category);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+                return new JsonResponse()
+                {
+                    Message = "Đổi trạng thái thành công",
+                    Success = true
+                };
             }
             catch (Exception)
             {
@@ -39,14 +48,18 @@ namespace Blog.Application.Catalog.CategoryService
 
         }
 
-        public async Task<bool> CreateCategory(CreateCategoryModel model)
+        public async Task<JsonResponse> CreateCategory(CreateCategoryModel model)
         {
             try
             {
                 var checkSlug = await _context.Categories.FirstOrDefaultAsync(c => c.Slug == model.Slug);
                 if(checkSlug != null)
                 {
-                    return false;
+                    return new JsonResponse()
+                    {
+                        Message = $"Slug = {model.Slug} đã tồn tại",
+                        Success = false
+                    };
                 }
                 var category = new Category()
                 {
@@ -58,7 +71,12 @@ namespace Blog.Application.Catalog.CategoryService
                 };
 
                 _context.Categories.Add(category);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+                return new JsonResponse()
+                {
+                    Message = "Tạo mới thành công",
+                    Success = true
+                }; ;
             }
             catch (Exception)
             {
@@ -66,15 +84,27 @@ namespace Blog.Application.Catalog.CategoryService
             }
         }
 
-        public async Task<bool> DeleteCategory(int id)
+        public async Task<JsonResponse> DeleteCategory(int id)
         {
             try
             {
                 var category = await _context.Categories.FindAsync(id);
-                if (category == null) return false;
+                if (category == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Không tồn tại danh mục với Id = {id}",
+                        Success = false
+                    };
+                }
 
                 _context.Categories.Remove(category);
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+                return new JsonResponse()
+                {
+                    Message = "Xóa thành công",
+                    Success = true
+                };
             }
             catch (Exception)
             {
@@ -148,13 +178,30 @@ namespace Blog.Application.Catalog.CategoryService
             }
         }
 
-        public async Task<bool> UpdateCategory(UpdateCategoryModel model)
+        public async Task<JsonResponse> UpdateCategory(UpdateCategoryModel model)
         {
             try
             {
                 var category = await _context.Categories.FindAsync(model.Id);
 
-                if (category == null) return false;
+                if (category == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Không tồn tại danh mục với Id = ${model.Id}",
+                        Success = true
+                    };
+                }
+
+                var checkSlugCategory = await _context.Categories.FirstOrDefaultAsync(x => x.Slug == model.Slug);
+                if (checkSlugCategory != null && checkSlugCategory != category)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Slug = ${model.Slug} đã tồn tại",
+                        Success = false
+                    };
+                }
 
                 category.Name = model.Name;
                 category.Status = model.Status;
@@ -162,8 +209,13 @@ namespace Blog.Application.Catalog.CategoryService
                 category.UpdatedAt = DateTime.Now;
 
                 _context.Categories.Update(category);
+                await _context.SaveChangesAsync();
 
-                return await _context.SaveChangesAsync() > 0;
+                return new JsonResponse()
+                {
+                    Message = "Cập nhật thành công",
+                    Success = true
+                };
             }
             catch (Exception)
             {

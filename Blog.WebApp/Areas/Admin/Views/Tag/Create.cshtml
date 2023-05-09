@@ -1,66 +1,48 @@
-﻿@model Blog.Data.Entities.Category
+﻿@model Blog.ViewModel.Catalog.Tag.CreateTagModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Create";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Sửa Danh Mục</h1>
-
+<h1>Tạo Tag</h1>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit" asp-controller="Category" asp-area="Admin" method="post" id="formEditCategory">
+        <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Id" class="control-label">Mã Danh Mục</label>
-                <input asp-for="Id" id="id" class="form-control" value="@Model.Id" readonly/>
-                <span asp-validation-for="Id" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"><span class="text-danger">*  </span>Tên Danh Mục</label>
-                <input asp-for="Name" id="name" class="form-control" value="@Model.Name"/>
+                <label asp-for="Name" class="control-label"><span class="text-danger">*  </span>Tên Tag</label>
+                <input asp-for="Name" id="name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Slug" class="control-label"><span class="text-danger">*  </span>Slug</label>
-                <input asp-for="Slug" id="slug" class="form-control" value="@Model.Slug" />
+                <input asp-for="Slug" id="slug" class="form-control" />
                 <span asp-validation-for="Slug" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Status" class="control-label"><span class="text-danger">*  </span>Trạng Thái</label>
-                <select asp-for="Status" id="status" class="form-control" asp-selected-value="@Model.Status">
-                    <option value="0">
-                        Ngưng Hoạt Động
-                    </option>
-                    <option value="1">
-                        Hoạt Động
-                    </option>
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <button type="submit" onclick="submitEditCategory(event)" class="btn btn-primary" >Lưu</button>
+                <button type="submit" class="btn btn-primary" onclick="createTag(event)">Tạo Mới</button>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
+
+<div>
+    <a class="btn btn-outline-primary" asp-action="Index">Quay Lại Danh Sách</a>
+</div>
 
 @section AdminScripts{
     <script>
-        function submitEditCategory(e) {
+        function createTag(e) {
             e.preventDefault()
             const name = $("#name").val()
             const slug = $("#slug").val()
-            const id = parseInt($("#id").val())
-            const status = parseInt($("#status").val())
             
-            if(slug === "" || name === "" || id === "" || status === ""){
+            if(slug === "" || name === ""){
                 swal.fire({
                     title:"Lỗi",
                     text:"Vui lòng không để trống những ô nhập có dấu *",
@@ -71,22 +53,19 @@
 
             const body = {
                 name: name,
-                slug: slug,
-                id:id,
-                status:status
+                slug: slug
             }
-
             swal.fire({
-                title: 'Bạn có sửa nó chứ ?',
+                title: 'Bạn có muốn tạo mới nó chứ ?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Chắc chắn',
+                confirmButtonText: 'Chắc chắn ',
                 cancelButtonText: 'Không',
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        type: 'PUT',
-                        url: "@Url.Action("Edit","Category",new {Area = "Admin"})",
+                        type: 'POST',
+                        url: "@Url.Action("Create","Tag",new {Area = "Admin"})",
                         contentType: 'application/json',
                         data: JSON.stringify(body),
                         success: function(response) {
@@ -95,7 +74,7 @@
                                     title: response.message,
                                     icon: 'success',
                                 }).then(result => {
-                                    window.location = "@Url.Action("Index","Category")"
+                                    window.location = "@Url.Action("Index","Tag",new {Area = "Admin"})"
                                 })
 
                             } else {

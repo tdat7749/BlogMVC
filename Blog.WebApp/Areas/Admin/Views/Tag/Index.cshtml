@@ -1,12 +1,12 @@
-﻿@*@using Blog.ViewModel.Catalog.Category
-@model Blog.ViewModel.Common.PagingResponse<List<CategoryVm>>*@
+﻿@model IEnumerable<Blog.ViewModel.Catalog.Tag.TagVm>
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
 <p class="text-right">
-    <a asp-action="Create" class="btn btn-primary">Tạo Mới</a>
+    <a asp-action="Create" asp-controller="Tag" class="btn btn-primary">Tạo Mới</a>
 </p>
 
 <div class="text-right mt-8 d-flex align-items-center justify-content-end mb-4">
@@ -86,13 +86,13 @@
 
 @section AdminScripts{
     <script>
-        $(document).ready(function() {
+         $(document).ready(function() {
             const params = new URLSearchParams(window.location.search)
             const pageIndex = params.get("pageIndex")
             const pageSize = params.get("pageSize")
             const keyword = params.get("keyword")
             $.ajax({
-                url: "@Url.Action("GetAllCategories","Category",new {Area = "Admin"})",
+                url: "@Url.Action("GetAllTags","Tag",new {Area = "Admin"})",
                 type: 'POST',
                 contentType: 'application/json',
                 dataType: 'json',
@@ -102,12 +102,12 @@
                     Keyword: keyword ? keyword : ""
                 }),
                 success: function(response) {
+                    console.log(response)
                     renderData(response)
                 }
             })
-
-            $('#paginationID .li').removeAttr('class');
         })
+
 
         function renderData(response) {
             $("#tableBody").empty()
@@ -119,7 +119,7 @@
             const pageIndex = params.get("pageIndex") ? params.get("pageIndex") : 1
             if(response?.data.length <= 0){
                 $("#error-table").append(`
-                <p class="text-danger text-lg">Không tồn tại danh mục nào</p>
+                <p class="text-danger text-lg">Không tồn tại tag nào</p>
                 
                 `)
             }
@@ -139,8 +139,8 @@
                                                                                         <a data-status="${item.status === 1 ? 0 : 1}" data-id="${item.id}" onclick="changeStatus()" class="btnStatus btn ${item.status === 1 ? "btn-success" : "btn-dark"}" href="javascript:void(0)">${item.status === 1 ? "Hoạt Động" : "Ngừng Hoạt Động"}</a>
                                                                                     </td>
                                                                                     <td>
-                                                                                    <a class="btn btn-primary" href="@Url.Action("Edit","Category")/${item.id}">Sửa</a>
-                                                                                    <a class="btn btn-danger" onclick="DeleteCategory(${item.id})" href="javascript:void(0)">Xóa</a>
+                                                                                    <a class="btn btn-primary" href="@Url.Action("Edit","Tag")/${item.id}">Sửa</a>
+                                                                                    <a class="btn btn-danger" onclick="DeleteTag(${item.id})" href="javascript:void(0)">Xóa</a>
                                                                                     </td>
                                                                                 </tr>
                                                                                                 `)
@@ -171,6 +171,8 @@
 
         }
 
+
+        
         function Paginantion(index) {
             const currentUrl = new URL(window.location.href);
             const urlParams = new URLSearchParams(window.location.search)
@@ -185,7 +187,7 @@
             const keyword = urlParams.get('keyword')
 
             $.ajax({
-                url: "@Url.Action("GetAllCategories","Category",new {Area = "Admin"})",
+                url: "@Url.Action("GetAllTags","Tag",new {Area = "Admin"})",
                 type: 'POST',
                 contentType: 'application/json',
                 dataType: 'json',
@@ -211,7 +213,7 @@
                 }
 
                 Swal.fire({
-                    title: "Bạn chắc chắn thay đổi trạng thái danh mục chứ ?",
+                    title: "Bạn chắc chắn thay đổi trạng thái tag chứ ?",
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Chắc chắn',
@@ -221,7 +223,7 @@
                         console.log(body)
                         $.ajax({
                             type: "PATCH",
-                            url: "@Url.Action("ChangeStatus","Category",new {Area = "Admin"})",
+                            url: "@Url.Action("ChangeStatus","Tag",new {Area = "Admin"})",
                             contentType: "application/json",
                             data: JSON.stringify(body),
                             success: function(response) {
@@ -260,10 +262,10 @@
             })
         }
 
-        function DeleteCategory(id) {
+        function DeleteTag(id) {
             Swal.fire({
-                title: "Xóa Danh Mục",
-                text: "Bạn có muốn xóa danh mục này ?",
+                title: "Xóa Tag",
+                text: "Bạn có muốn xóa tag này ?",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: "Xóa",
@@ -271,7 +273,7 @@
             }).then(result => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "@Url.Action("Delete","Category",new {Area = "Admin"})",
+                        url: "@Url.Action("Delete","Tag",new {Area = "Admin"})",
                         type: "DELETE",
                         contentType: 'application/json',
                         data: JSON.stringify(id),
