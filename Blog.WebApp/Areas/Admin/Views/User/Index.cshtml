@@ -1,0 +1,322 @@
+﻿@model IEnumerable<Blog.ViewModel.System.User.UserVm>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Danh Sách Người Dùng</h1>
+
+<hr/>
+
+<div class="text-right mt-8 d-flex align-items-center justify-content-end mb-4">
+    <input id="searchKeyword" type="text" class="form-control w-25" />
+    <button onclick="SearchKeyWord()" class="btn btn-primary w-10 ml-2">Tìm Kiếm</button>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Tài Khoản
+                </th>
+                <th>
+                    Họ
+                </th>
+                <th>
+                    Tên
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Số Điện Thoại
+                </th>
+                <th>
+                    Thao Tác
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @*@foreach (var item in Model.Data) {
+            <tr>
+            <td>
+            @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Slug)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+            </tr>
+            }*@
+        </tbody>
+    </table>
+    <div id="error-table" class="text-center">
+
+    </div>
+</div>
+<nav aria-label="Page navigation example">
+    <ul class="pagination" id="paginationID">
+        @*        <li class="page-item">
+        <a class="page-link" href="#" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+        </a>
+        </li>
+        @for (var i = 1; i <= Model.TotalPage; i++)
+        {
+        <li class="page-item"><a class="page-link" href="#">@i</a></li>
+        }
+        <li class="page-item">
+        <a class="page-link" href="#" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+        </a>
+        </li>*@
+    </ul>
+</nav>
+
+@section AdminScripts{
+    <script>
+         $(document).ready(function() {
+            const params = new URLSearchParams(window.location.search)
+            const pageIndex = params.get("pageIndex")
+            const pageSize = params.get("pageSize")
+            const keyword = params.get("keyword")
+            $.ajax({
+                url: "@Url.Action("GetAllUsers","User",new {Area = "Admin"})",
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    PageIndex: pageIndex ? pageIndex : 1,
+                    PageSize: pageSize ? pageSize : 3,
+                    Keyword: keyword ? keyword : ""
+                }),
+                success: function(response) {
+                    console.log(response)
+                    renderData(response)
+                }
+            })
+        })
+
+
+        function renderData(response) {
+            $("#tableBody").empty()
+            $("#paginationID").empty()
+            $("#error-table").empty()
+
+            var totalPages = response.totalPage
+            const params = new URLSearchParams(window.location.search)
+            const pageIndex = params.get("pageIndex") ? params.get("pageIndex") : 1
+            if(response?.data.length <= 0){
+                $("#error-table").append(`
+                <p class="text-danger text-lg">Không tồn tại tag nào</p>
+                
+                `)
+            }
+            response.data.map((item, index) => {
+                $("#tableBody").append(`
+                                                                                                 <tr>
+                                                                                    <td>
+                                                                                        ${item.userName}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        ${item.firstName}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        ${item.lastName}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        ${item.email}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        ${item.phoneNumber}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                    <a class="btn btn-info" href="@Url.Action("Edit","User")/${item.id}">Chi Tiết</a>
+                                                                                    <a class="btn btn-warning" href="@Url.Action("Role","User")/${item.id}">Quyền</a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                                `)
+            })
+
+
+            // Paginantion
+            $("#paginationID").append(`
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" href="#" aria-label="Previous">
+                                                                            <span aria-hidden="true">&laquo;</span>
+                                                                            <span class="sr-only">Previous</span>
+                                                                        </a>
+                                                                    </li>`)
+
+            for (let i = 1; i <= response.totalPage; i++) {
+                $("#paginationID").append(`<li class="page-item ${i === Number(pageIndex) ? 'active' : ''}"><a onclick="Paginantion(${i})" href="javascript:void(0)" class="page-link">${i}</a></li>`)
+            }
+
+
+            $("#paginationID").append(`
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" href="#" aria-label="Next">
+                                                                            <span aria-hidden="true">&raquo;</span>
+                                                                            <span class="sr-only">Next</span>
+                                                                        </a>
+                                                                    </li>`)
+
+        }
+
+
+        
+        function Paginantion(index) {
+            const currentUrl = new URL(window.location.href);
+            const urlParams = new URLSearchParams(window.location.search)
+            if (currentUrl.search !== "") {
+                urlParams.set('pageIndex', index);
+                currentUrl.search = urlParams.toString()
+                window.history.pushState({}, '', currentUrl)
+            } else {
+                window.history.pushState(null, null, `?pageIndex=${index}`)
+            }
+
+            const keyword = urlParams.get('keyword')
+            const pageSize = urlParams.get('pageSize')
+
+            $.ajax({
+                url: "@Url.Action("GetAllUsers","User",new {Area = "Admin"})",
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    PageIndex: index,
+                    PageSize: 3,
+                    Keyword: keyword ? keyword : ''
+                }),
+                success: function(response) {
+                    renderData(response)
+                }
+            })
+        }
+
+        //function changeStatus() {
+        //    $(".btnStatus").click(function(e) {
+        //        const btn = $(this)
+        //        const statusCode = parseInt(btn.attr("data-status"))
+        //        const id = parseInt(btn.attr("data-id"))
+        //        const body = {
+        //            status: statusCode,
+        //            id: id
+        //        }
+
+        //        Swal.fire({
+        //            title: "Bạn chắc chắn thay đổi trạng thái tag chứ ?",
+        //            icon: 'question',
+        //            showCancelButton: true,
+        //            confirmButtonText: 'Chắc chắn',
+        //            cancelButtonText: 'Không',
+        //        }).then(result => {
+        //            if (result.isConfirmed) {
+        //                console.log(body)
+        //                $.ajax({
+        //                    type: "PATCH",
+        //                    url: "@Url.Action("ChangeStatus","User",new {Area = "Admin"})",
+        //                    contentType: "application/json",
+        //                    data: JSON.stringify(body),
+        //                    success: function(response) {
+        //                        if (response.success === true) {
+        //                            Swal.fire({
+        //                                title: response.message,
+        //                                icon: 'success'
+        //                            })
+        //                            if (statusCode === 1) {
+        //                                btn.text("Hoạt Động")
+        //                                btn.removeClass("btn-dark")
+        //                                btn.addClass("btn-success")
+        //                                btn.attr('data-status', 0)
+        //                            }
+
+        //                            if (statusCode === 0) {
+        //                                btn.text("Ngừng Hoạt Động")
+        //                                btn.removeClass("btn-success")
+        //                                btn.addClass("btn-dark")
+        //                                btn.attr('data-status', 1)
+        //                            }
+        //                        } else {
+        //                            Swal.fire({
+        //                                title: response.message,
+        //                                icon: 'error'
+        //                            })
+        //                        }
+        //                    },
+        //                    error: function(jqXHR, textStatus, errorThrown) {
+        //                        console.log("Lỗi " + textStatus + ": " + errorThrown);
+        //                        console.log(jqXHR);
+        //                    }
+        //                })
+        //            }
+        //        })
+        //    })
+        //}
+
+        //function DeleteTag(id) {
+        //    Swal.fire({
+        //        title: "Xóa Tag",
+        //        text: "Bạn có muốn xóa tag này ?",
+        //        icon: 'question',
+        //        showCancelButton: true,
+        //        confirmButtonText: "Xóa",
+        //        cancelButtonText: "Không"
+        //    }).then(result => {
+        //        if (result.isConfirmed) {
+        //            $.ajax({
+        //                url: "@Url.Action("Delete","Tag",new {Area = "Admin"})",
+        //                type: "DELETE",
+        //                contentType: 'application/json',
+        //                data: JSON.stringify(id),
+        //                success: function(response) {
+        //                    if (response.success === true) {
+        //                        Swal.fire({
+        //                            title: response.message,
+        //                            icon: 'success'
+        //                        })
+        //                        Paginantion(1)
+
+        //                    } else {
+        //                        Swal.fire({
+        //                            title: response.message,
+        //                            icon: 'error'
+        //                        })
+        //                    }
+        //                },
+        //                error: function(jqXHR, textStatus, errorThrown) {
+        //                    Swal.fire({
+        //                        title: "Có lỗi",
+        //                        icon: 'error'
+        //                    })
+        //                }
+        //            })
+        //        }
+        //    })
+        //}
+
+
+        function SearchKeyWord() {
+            const keyword = $("#searchKeyword").val()
+            window.history.pushState(null, null, `?keyword=${keyword}`)
+
+            Paginantion(1)
+
+        }
+    </script>
+}

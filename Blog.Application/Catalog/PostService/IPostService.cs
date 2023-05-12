@@ -1,4 +1,5 @@
-﻿using Blog.ViewModel.Catalog.Post;
+﻿using Blog.Data.Entities;
+using Blog.ViewModel.Catalog.Post;
 using Blog.ViewModel.Common;
 using System;
 using System.Collections.Generic;
@@ -11,15 +12,20 @@ namespace Blog.Application.Catalog.PostService
     public interface IPostService
     {
         //Admin
-        Task<PagingResponse<List<PostVm>>> GetAllPost(PagingRequest request);
-        Task<bool> CreatePost();
-        Task<bool> UpdatePost();
-        Task<bool> DeletePost();
+        Task<PagingResponse<List<PostListVm>>> GetAllPost(PagingRequest request);
+        Task<JsonResponse> CreatePost(CreatePostModel model);
+        Task<JsonResponse> UpdatePost(UpdatePostModel model);
+        Task<JsonResponse> DeletePost(int id);
+        Task<JsonResponse> ChangePublished(UpdatePostPublishedModel model);
+        Task<Post> GetPostForEdit(int id);
 
 
         // CLIENT
-        Task<PagingResponse<List<PostVm>>> GetPublicAllPost(PagingRequest request);
-        Task<List<PostVm>> GetPostLatest();
+        Task<PagingResponse<List<PostListVm>>> GetPublicAllPost(PagingRequest request);
+        Task<List<PostListVm>> GetPostLatest();
+        Task<PostVm> GetPostBySlug(string slug);
+
+        void PlusViewPost(int id);
 
     }
 }

@@ -1,9 +1,13 @@
-using Blog.Application.Catalog.CategoryService;
+﻿using Blog.Application.Catalog.CategoryService;
 using Blog.Application.Catalog.PostService;
 using Blog.Application.Catalog.TagService;
 using Blog.Application.Common.FileStorageService;
+using Blog.Application.System.AuthenService;
+using Blog.Application.System.RoleService;
+using Blog.Application.System.UserService;
 using Blog.Data.EF;
 using Blog.Data.Entities;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,22 +21,60 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BlogDb"));
 });
 
-builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IAuthenService, AuthenService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+
+
 
 builder.Services.AddIdentity<UserApplication, IdentityRole>()
     .AddEntityFrameworkStores<BlogDbContext>()
     .AddDefaultTokenProviders();
 
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
 
     options.User.AllowedUserNameCharacters =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+
+
+    // Cấu hình Lockout - khóa user
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Khóa 5 phút
+    options.Lockout.MaxFailedAccessAttempts = 5; // Thất bại 5 lầ thì khóa
+    options.Lockout.AllowedForNewUsers = true;
+
+    //Email duy nhất
+    options.User.RequireUniqueEmail = true;
+});
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Admin/Authen";
+    options.AccessDeniedPath = "/";
+});
+
+
+//Đăng ký policy (chính sách)
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy =>
+    {
+        //Yêu cầu người dùng phải xác thực
+        policy.RequireAuthenticatedUser();
+
+        //Phải có quyền tên là ....
+        policy.RequireRole("Quản Trị Viên");
+    });
 });
 
 var app = builder.Build();
@@ -56,15 +98,16 @@ app.UseAuthorization();
 
 
 
+//RequireAuthorization ở dưới là đăng ký policy(chính sách) Admin cho Route này.
 app.MapControllerRoute(
       name: "Admin",
       pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-);
+).RequireAuthorization("Admin");
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"
-    );
+);
 
 
 app.Run();

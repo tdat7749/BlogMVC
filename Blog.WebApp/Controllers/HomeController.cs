@@ -36,11 +36,7 @@ namespace Blog.WebApp.Controllers
         public JsonResult UploadImage(IFormFile upload)
         {
             var result = _fileStorageService.UploadImageAsync(upload);
-            if(result == false)
-            {
-                return new JsonResult(new { success = false, message = "Failed" });
-            }
-            return new JsonResult(new { success = true, message = "Success" });
+            return new JsonResult(result);
 
         }
 

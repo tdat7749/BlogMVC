@@ -12,6 +12,7 @@ namespace Blog.Application.Catalog.TagService
     public interface ITagService
     {
         //ADMIN
+        Task<List<TagVm>> GetListTags();
         Task<PagingResponse<List<TagVm>>> GetAllTags(PagingRequest request);
         Task<JsonResponse> UpdateTag(UpdateTagModel model);
         Task<JsonResponse> CreateTag(CreateTagModel model);

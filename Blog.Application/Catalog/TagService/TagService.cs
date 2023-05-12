@@ -44,7 +44,7 @@ namespace Blog.Application.Catalog.TagService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
 
@@ -80,7 +80,7 @@ namespace Blog.Application.Catalog.TagService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
 
@@ -108,7 +108,7 @@ namespace Blog.Application.Catalog.TagService
             }
             catch(Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
 
@@ -123,7 +123,7 @@ namespace Blog.Application.Catalog.TagService
                 Id = x.Id,
                 Name = x.Name,
                 Slug = x.Slug,
-                Status = x.Status,
+                Status  = x.Status
             }).ToListAsync();
 
             return result;
@@ -166,6 +166,23 @@ namespace Blog.Application.Catalog.TagService
             };
         }
 
+        public async Task<List<TagVm>> GetListTags()
+        {
+            var query = from t in _context.Tags
+                        where t.Status == Status.Enable
+                        select t;
+
+            var result = await query.Select(x => new TagVm()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Slug = x.Slug,
+                Status = x.Status
+            }).ToListAsync();
+
+            return result;
+        }
+
         public async Task<Tag> GetTag(int id)
         {
             try
@@ -177,7 +194,7 @@ namespace Blog.Application.Catalog.TagService
             }
             catch (Exception)
             {
-                throw new Exception();
+                throw new Exception("Có lỗi xảy ra");
             }
         }
 
@@ -223,7 +240,7 @@ namespace Blog.Application.Catalog.TagService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
     }

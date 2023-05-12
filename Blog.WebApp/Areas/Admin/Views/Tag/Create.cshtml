@@ -5,8 +5,9 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Tạo Tag</h1>
-<hr />
+<h1>Tạo Mới Tag</h1>
+
+<hr/>
 
 <div class="row">
     <div class="col-md-4">
@@ -32,7 +33,7 @@
 
 
 <div>
-    <a class="btn btn-outline-primary" asp-action="Index">Quay Lại Danh Sách</a>
+    <a class="btn btn-outline-secondary" asp-action="Index">Quay Lại Danh Sách</a>
 </div>
 
 @section AdminScripts{
@@ -56,7 +57,8 @@
                 slug: slug
             }
             swal.fire({
-                title: 'Bạn có muốn tạo mới nó chứ ?',
+                title: 'Tạo Tag',
+                text:'Bạn chắc chắn muốn tạo tag này ?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Chắc chắn ',

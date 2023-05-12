@@ -5,6 +5,11 @@
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
+<h1>Danh Sách Danh Mục</h1>
+
+<hr/>
+
 <p class="text-right">
     <a asp-action="Create" class="btn btn-primary">Tạo Mới</a>
 </p>
@@ -183,6 +188,7 @@
             }
 
             const keyword = urlParams.get('keyword')
+            const pageSize = urlParams.get('pageSize')
 
             $.ajax({
                 url: "@Url.Action("GetAllCategories","Category",new {Area = "Admin"})",

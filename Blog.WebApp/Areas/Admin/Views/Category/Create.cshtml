@@ -5,9 +5,9 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h4>Tạo Danh Mục</h4>
+<h1>Tạo Danh Mục</h1>
 
-<hr />
+<hr/>
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create" method="post">
@@ -30,7 +30,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-outline-secondary">Quay Lại Danh Sách</a>
 </div>
 
 @section AdminScripts{
@@ -57,7 +57,8 @@
                 slug: slug
             }
             swal.fire({
-                title: 'Bạn có muốn tạo mới nó chứ ?',
+                title: 'Tạo Danh Mục',
+                text:'Bạn chắc chắn muốn tạo danh mục này ?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Chắc chắn ',

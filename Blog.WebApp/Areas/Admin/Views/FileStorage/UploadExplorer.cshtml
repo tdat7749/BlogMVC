@@ -1,0 +1,59 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Explorer</title>
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+</head>
+<style>
+    .row{
+        display:flex;
+        gap: 2rem;
+        flex-wrap:wrap;
+    }
+
+    .img-container{
+        border: 1px solid #6610f2;
+    }
+
+    .img-container:hover{
+        border: 1px solid #4e73df;
+        opacity: 0.7;
+        cursor:pointer;
+    }
+</style>
+<body>
+
+    <div id="browserFile">
+        <div class="row">
+            @foreach (var item in ViewBag.DirInfo)
+            {
+                <div class="img-container">
+                    <img src="~/upload-images/@item.Name" alt="@item.Name" imgName="@item.Name" width="120" height="100" />
+                </div>
+            }
+        </div>
+    </div>
+
+</body>
+
+
+</html>
+<script>
+    $(document).ready(function() {
+        var funcNum = @(Context.Request.Query["CKEditorFuncNum"] + ";")
+        $('#browserFile').on('click', 'img', function() {
+            var fileUrl = '/upload-images/' + $(this).attr('imgName');
+            window.opener.CKEDITOR.tools.callFunction(funcNum, fileUrl);
+            window.close();
+        })
+    })
+</script>

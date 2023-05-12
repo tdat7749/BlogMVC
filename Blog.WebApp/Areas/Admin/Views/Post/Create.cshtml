@@ -1,0 +1,172 @@
+﻿@model Blog.ViewModel.Catalog.Post.CreatePostModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Tạo Mới Bài Viết</h1>
+
+<hr/>
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"><span class="text-danger">*  </span>Tiêu Đề</label>
+        <input asp-for="Title" class="form-control" id="title" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Slug" class="control-label"><span class="text-danger">*  </span>Slug</label>
+        <input asp-for="Slug" class="form-control" id="slug" />
+        <span asp-validation-for="Slug" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Thumbnail" class="control-label"><span class="text-danger">*  </span>Hình Ảnh</label>
+        <input asp-for="Thumbnail" class="form-control" id="thumbnail" type="file" onchange="onChangeImage(event)" />
+        <span asp-validation-for="Thumbnail" class="text-danger"></span>
+            <img src="#" alt="thumbnail" id="previewThumbnail" class="w-25 h-25 object-fit-cover"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="CategoryId" class="control-label"><span class="text-danger">*  </span>Danh Mục</label>
+        <select asp-for="CategoryId" id="categoryId" class="form-control">
+            @foreach (var item in ViewBag.listCategories)
+            {
+                <option value=@item.Id>
+                    @item.Name
+                </option>
+            }
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Body" class="control-label"><span class="text-danger">*  </span>Nội Dung</label>
+        <textarea asp-for="Body" class="w-100" id="body"></textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="Tags" class="control-label"><span class="text-danger">*  </span>Tags</label>
+        @foreach (var item in ViewBag.listTags)
+        {
+            <div class="form-check">
+                <input class="tag form-check-input" type="checkbox" value="@item.Id">
+                <label class="form-check-label" asp-for="Tags">
+                    @item.Name
+                </label>
+            </div>
+        }
+    </div>
+    <div class="form-group">
+        <button onclick="createPost(event)" class="btn btn-primary">Tạo Bài Viết</button>
+    </div>
+</form>
+<div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Quay Lại Danh Sách</a>
+</div>
+
+
+@section AdminScripts{
+    <script src="~/ckeditor/ckeditor.js"></script>
+    
+    <script>
+        $(document).ready(function(){
+            CKEDITOR.replace('body', {
+            filebrowserUploadUrl: "@Url.Action("UploadImage","FileStorage",new {Area = "Admin"})",
+            filebrowserBrowseUrl: "@Url.Action("UploadExplorer","FileStorage",new {Area = "Admin"})"
+        })
+        })
+    </script>
+
+    <script>
+
+        function onChangeImage(e){
+            const file = e.target.files[0]
+            if(file && file.type.includes('image/')){
+                var reader = new FileReader()
+
+                reader.onload = function(e) {
+                    $("#previewThumbnail").attr('src', e.target.result);
+
+                }
+                reader.readAsDataURL(file);
+                return;
+            }
+            $("#previewThumbnail").attr('src','#');
+            swal.fire({
+                title:"Lỗi",
+                icon:"error",
+                text:"File/Hình ảnh không tồn tại"
+            })
+        }
+
+        function createPost(e) {
+            e.preventDefault()
+            const title = $("#title").val()
+            const slug = $("#slug").val()
+            const body = CKEDITOR.instances['body'].getData()
+            const categoryId = parseInt($("#categoryId").val())
+            const thumbnail = $("#thumbnail").prop("files")[0];
+            const tags = [];
+            $(".tag:checked").each(function() {
+                  tags.push(parseInt($(this).val()))
+            })
+
+
+            if (slug === "" || title === "" || body === "" || categoryId === "" || tags.length <= 0 || thumbnail === undefined) {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng không để trống những ô nhập có dấu *",
+                    icon: "error"
+                })
+                return;
+            }
+
+            var formData = new FormData()
+            formData.append('title',title)
+            formData.append('slug',slug)
+            formData.append('body',body)
+            formData.append('categoryId',categoryId)
+            formData.append('thumbnail',thumbnail)
+            formData.append('userId',1)
+
+            tags.forEach(function(item){
+                formData.append('tags[]',parseInt(item))
+            })
+
+
+            swal.fire({
+                title: 'Tạo Bài Viết',
+                text:'Bạn có chắc chắn muốn tạo bài viết này ?'
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Chắc chắn ',
+                cancelButtonText: 'Không',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        enctype: 'multipart/form-data',
+                        url: "@Url.Action("Create","Post",new {Area = "Admin"})",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'success',
+                                }).then(result => {
+                                    window.location = "@Url.Action("Index","Post",new {Area = "Admin"})"
+                                })
+
+                            } else {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

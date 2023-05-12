@@ -1,0 +1,91 @@
+﻿@model IEnumerable<Blog.ViewModel.System.Role.RoleVm>
+
+@{
+    ViewData["Title"] = "Role";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+}
+
+<h1>Đăng Ký Quyền Cho Người Dùng</h1>
+
+<hr />
+
+<hr />
+<input value="ViewBag.CurrentId" hidden id="id" />
+<div class="d-flex flex-column" style="gap:2rem">
+    @foreach (var item in @Model)
+    {
+        <div class="form-check">
+            <input class="role form-check-input" type="checkbox" value="@item.Role" @(ViewBag.ListCurrentRoles.Contains(item.Role) ? "checked" : "")>
+            <label class="form-check-label" asp-for="@item.Role">
+                @item.Role
+            </label>
+        </div>
+    }
+</div>
+<div class="mt-4 mb-4">
+    <button type="submit" onclick="submitRegisterRoles(event)" class="btn btn-primary">Đăng Ký Quyền</button>
+</div>
+
+<div class="mt-4 mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary">Quay Lại Danh Sách</a>
+</div>
+
+
+
+@section AdminScripts{
+    <script>
+        function submitRegisterRoles(e) {
+            e.preventDefault()
+            const id = $("#id").val()
+
+            const roles = []
+
+            $(".role:checked").each(function() {
+                roles.push($(this).val())
+            })
+
+            console.log(roles)
+
+            const body = {
+                id: id,
+                listRoles: roles
+            }
+
+            swal.fire({
+                title: 'Đăng Ký Quyền',
+                text: 'Bạn chắc chắn muốn đăng ký các quyền này ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Chắc chắn',
+                cancelButtonText: 'Không',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'PUT',
+                        url: "@Url.Action("RegisterRoles","User",new {Area = "Admin"})",
+                        contentType: 'application/json',
+                        data: JSON.stringify(body),
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'success',
+                                }).then(result => {
+                                    window.location = "@Url.Action("Index","User",new {Area = "Admin"})"
+                                })
+
+                            } else {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}
+

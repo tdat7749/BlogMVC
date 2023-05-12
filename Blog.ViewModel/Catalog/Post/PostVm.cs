@@ -18,8 +18,12 @@ namespace Blog.ViewModel.Catalog.Post
 
         public int View { get; set; }
 
+        public string CreatedAt { get; set; }
         public string Thumbnail { get; set; }
-        public string Category { get; set; }
+        public string CategoryName { get; set; }
         public List<TagVm> ListTags { get; set; }
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }

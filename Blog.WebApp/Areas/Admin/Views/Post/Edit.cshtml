@@ -1,0 +1,195 @@
+﻿@model Blog.ViewModel.Catalog.Post.UpdatePostModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Cập Nhật Bài Viết</h1>
+
+<hr/>
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Id" class="control-label"><span class="text-danger">*  </span>Mã Bài Viết</label>
+        <input asp-for="Id" class="form-control" id="id" value="@Model.Id" readonly />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"><span class="text-danger">*  </span>Tiêu Đề</label>
+        <input asp-for="Title" class="form-control" id="title" value="@Model.Title" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Slug" class="control-label"><span class="text-danger">*  </span>Slug</label>
+        <input asp-for="Slug" class="form-control" id="slug" value="@Model.Slug" />
+        <span asp-validation-for="Slug" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Thumbnail" class="control-label"><span class="text-danger">*  </span>Hình Ảnh</label>
+        <input asp-for="Thumbnail" class="form-control" id="thumbnail" type="file" onchange="onChangeImage(event)" />
+        <span asp-validation-for="Thumbnail" class="text-danger"></span>
+        <img src="/thumbnail/@Model.PreviewThumbnail" alt="thumbnail" id="previewThumbnail" class="w-25 h-25 object-fit-cover" />
+    </div>
+    <div class="form-group">
+        <label asp-for="CategoryId" class="control-label"><span class="text-danger">*  </span>Danh Mục</label>
+        <select asp-for="CategoryId" id="categoryId" class="form-control" asp-selected-value="@Model.CategoryId">
+            @foreach (var item in ViewBag.listCategories)
+            {
+                <option value=@item.Id>
+                    @item.Name
+                </option>
+            }
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Body" class="control-label"><span class="text-danger">*  </span>Nội Dung</label>
+        <textarea asp-for="Body" class="w-100" id="body">@Model.Body</textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="Tags" class="control-label"><span class="text-danger">*  </span>Tags</label>
+        @foreach (var item in ViewBag.listTags)
+        {
+            <div class="form-check">
+                <input class="tag form-check-input" type="checkbox" value="@item.Id" @(@Model.Tags.Contains(item.Id) ? "checked" : "")>
+                <label class="form-check-label" asp-for="Tags">
+                    @item.Name
+                </label>
+            </div>
+        }
+    </div>
+    <div class="form-group">
+        <label asp-for="Body" class="control-label"><span class="text-danger">*  </span>Trạng Thái</label>
+        <select asp-for="IsPublished" id="published" class="form-control" asp-selected-value="@Model.IsPublished">
+            
+            <option value=false>
+                    Ngưng Hoạt Động
+                </option>
+            <option value=true>
+                    Hoạt Động
+                </option>
+        </select>
+    </div>
+    <div class="form-group">
+        <button onclick="updatePost(event)" class="btn btn-primary">Cập Nhật Bài Viết</button>
+    </div>
+</form>
+<div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Quay Lại Danh Sách</a>
+</div>
+
+@section AdminScripts{
+    <script src="~/ckeditor/ckeditor.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            CKEDITOR.replace('body', {
+                filebrowserUploadUrl: "@Url.Action("UploadImage","FileStorage",new {Area = "Admin"})",
+                filebrowserBrowseUrl: "@Url.Action("UploadExplorer","FileStorage",new {Area = "Admin"})"
+            })
+        })
+    </script>
+
+    <script>
+
+        function onChangeImage(e) {
+            const file = e.target.files[0]
+            if (file && file.type.includes('image/')) {
+                var reader = new FileReader()
+
+                reader.onload = function(e) {
+                    $("#previewThumbnail").attr('src', e.target.result);
+
+                }
+                reader.readAsDataURL(file);
+                return;
+            }
+            $("#previewThumbnail").attr('src','/thumbnail/@Model.PreviewThumbnail');
+            swal.fire({
+                title: "Lỗi",
+                icon: "error",
+                text: "File/Hình ảnh không tồn tại"
+            })
+        }
+
+        function updatePost(e) {
+            e.preventDefault()
+            const id = parseInt($("#id").val())
+            const title = $("#title").val()
+            const slug = $("#slug").val()
+            const body = CKEDITOR.instances['body'].getData()
+            const categoryId = parseInt($("#categoryId").val())
+            const thumbnail = $("#thumbnail").prop("files")[0];
+            const isPublished = $("#published").val() === "true" ? true : false
+            const tags = [];
+            $(".tag:checked").each(function() {
+                tags.push(parseInt($(this).val()))
+            })
+
+
+            if (slug === "" || title === "" || body === "" || categoryId === "" || tags.length <= 0) {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng không để trống những ô nhập có dấu *",
+                    icon: "error"
+                })
+                return;
+            }
+
+           var formData = new FormData()
+            formData.append('id',id)
+            formData.append('title',title)
+            formData.append('slug',slug)
+            formData.append('body',body)
+            formData.append('categoryId',categoryId)
+            formData.append('IsPublished',isPublished)
+            
+            formData.append('userId',1)
+
+            tags.forEach(function(item){
+                formData.append('tags[]',parseInt(item))
+            })
+
+            if(thumbnail !== undefined){
+                formData.append('thumbnail',thumbnail)
+            }
+
+            swal.fire({
+                title: 'Sửa Bài Viết',
+                text:'Bạn có chắc chắn muốn sửa bài viết không ?'
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Chắc chắn ',
+                cancelButtonText: 'Không',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'PUT',
+                        enctype: 'multipart/form-data',
+                        url: "@Url.Action("Edit","Post",new {Area = "Admin"})",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'success',
+                                }).then(result => {
+                                    window.location = "@Url.Action("Index","Post",new {Area = "Admin"})"
+                                })
+
+                            } else {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

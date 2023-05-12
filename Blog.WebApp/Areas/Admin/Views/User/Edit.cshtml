@@ -1,0 +1,201 @@
+﻿@model Blog.Data.Entities.UserApplication
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Cập Nhật Người Dùng</h1>
+
+<hr/>
+<div class="d-flex flex-column justify-content-center align-items-center" style="gap:1rem">
+    <div style="width:100px;height:100px">
+        <img src="/avatar/@Model.Avatar" alt="@Model.UserName" id="previewAvatar" class="w-100 h-100 object-fit-cover rounded" />
+    </div>
+    <input type="file" id="avatar" onchange="previewAvatar(event)" />
+    <button type="submit" class="btn btn-primary" onclick="ChangeAvatar(event)">Thay Đổi</button>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Id" class="control-label"><span class="text-danger">*  </span>Mã Người Dùng</label>
+                <input asp-for="Id" id="id" value="@Model.Id" class="form-control" readonly />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FirstName" class="control-label"><span class="text-danger">*  </span>Họ</label>
+                <input asp-for="FirstName" id="firstName" value="@Model.FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label"><span class="text-danger">*  </span>Tên</label>
+                <input asp-for="LastName" id="lastName" value="@Model.LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"><span class="text-danger">*  </span>Email</label>
+                <input asp-for="Email" id="email" value="@Model.Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PhoneNumber" class="control-label"><span class="text-danger">*  </span>Số Điện Thoại</label>
+                <input asp-for="PhoneNumber" id="phoneNumber" value="@Model.PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" onclick="submitEditUser(event)" class="btn btn-primary">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<div>
+    <a class="btn btn-outline-secondary" asp-action="Index">Quay Lại Danh Sách</a>
+</div>
+
+@section AdminScripts{
+    <script>
+
+        function previewAvatar(e) {
+
+            const file = e.target.files[0]
+
+            if (file && file.type.includes("image/")) {
+                var fileReader = new FileReader()
+
+                fileReader.onload = function(e) {
+                    $("#previewAvatar").attr('src', e.target.result)
+                }
+                fileReader.readAsDataURL(file)
+                return;
+            }
+
+            $("#previewAvatar").attr('src',"/avatar/@Model.Avatar")
+            swal.fire({
+                title: "Lỗi",
+                text: "Hình ảnh không tồn tại",
+                icon: "error"
+            })
+
+        }
+
+        function ChangeAvatar(e) {
+            e.preventDefault()
+
+            const avatar = $("#avatar").prop("files")[0]
+            const id = $("#id").val()
+
+            if (avatar === undefined) {
+                swal.fire({
+                    title: 'Lỗi',
+                    text: 'Vui lòng chọn ảnh trước khi cập nhật',
+                    icon: 'error'
+                })
+                return
+            }
+
+            var formData = new FormData();
+            formData.append('id', id)
+            formData.append('avatar', avatar)
+
+            $.ajax({
+                type: 'PATCH',
+                enctype: 'multipart/form-data',
+                url: "@Url.Action("ChangeAvatar","User", new {Area = "Admin"})",
+                data: formData,
+                contentType: false,
+                processData: false,
+
+                success: function(response) {
+                    if (response.success === true) {
+                        swal.fire({
+                            title: "Thành Công",
+                            text: response.message,
+                            icon: 'success'
+                        })
+                    } else {
+                        swal.fire({
+                            title: "Thất Bại",
+                            text: response.message,
+                            icon: 'error'
+                        })
+                    }
+                },
+
+                error: function() {
+                    swal.fire({
+                        title: "Thất Bại",
+                        text: "Có lỗi xảy ra",
+                        icon: 'error'
+                    })
+                }
+
+            })
+        }
+
+        function submitEditUser(e) {
+            e.preventDefault()
+            const firstName = $("#firstName").val().trim()
+            const lastName = $("#lastName").val().trim()
+            const id = $("#id").val()
+            const email = $("#email").val().trim()
+            const phoneNumber = $("#phoneNumber").val().trim()
+
+            if (firstName === "" || lastName === "" || email === "" || phoneNumber === "") {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng không để trống những ô nhập có dấu *",
+                    icon: "error"
+                })
+                return;
+            }
+
+            const body = {
+                firstName: firstName,
+                lastName: lastName,
+                id: id,
+                email: email,
+                phoneNumber: phoneNumber
+            }
+
+            swal.fire({
+                title: 'Cập Nhật Thông Tin',
+                text: 'Bạn chắc chắn muốn cập nhật thông tin ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Chắc chắn',
+                cancelButtonText: 'Không',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'PUT',
+                        url: "@Url.Action("Edit","User",new {Area = "Admin"})",
+                        contentType: 'application/json',
+                        data: JSON.stringify(body),
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'success',
+                                }).then(result => {
+                                    window.location = "@Url.Action("Index","User")"
+                                })
+
+                            } else {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

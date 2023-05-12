@@ -5,6 +5,11 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
+
+<h1>Danh Sách Tag</h1>
+
+<hr/>
+
 <p class="text-right">
     <a asp-action="Create" asp-controller="Tag" class="btn btn-primary">Tạo Mới</a>
 </p>
@@ -185,6 +190,7 @@
             }
 
             const keyword = urlParams.get('keyword')
+            const pageSize = urlParams.get('pageSize')
 
             $.ajax({
                 url: "@Url.Action("GetAllTags","Tag",new {Area = "Admin"})",

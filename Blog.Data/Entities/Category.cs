@@ -18,6 +18,5 @@ namespace Blog.Data.Entities
 
         public List<Post> Posts { get; set; }
 
-        public List<PostInTag> PostInTags { get; set; }
     }
 }

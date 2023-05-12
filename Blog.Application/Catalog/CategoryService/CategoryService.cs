@@ -43,7 +43,7 @@ namespace Blog.Application.Catalog.CategoryService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
 
         }
@@ -80,7 +80,7 @@ namespace Blog.Application.Catalog.CategoryService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
 
@@ -108,7 +108,7 @@ namespace Blog.Application.Catalog.CategoryService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
 
@@ -178,6 +178,23 @@ namespace Blog.Application.Catalog.CategoryService
             }
         }
 
+        public async Task<List<CategoryVm>> GetListCategories()
+        {
+            var query = from c in _context.Categories
+                        where c.Status == Status.Enable
+                        select c;
+
+            var result = await query.Select(x => new CategoryVm()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Slug = x.Slug,
+                Status = x.Status
+            }).ToListAsync();
+
+            return result;
+        }
+
         public async Task<JsonResponse> UpdateCategory(UpdateCategoryModel model)
         {
             try
@@ -219,7 +236,7 @@ namespace Blog.Application.Catalog.CategoryService
             }
             catch (Exception)
             {
-                throw new Exception();
+                return new JsonResponse() { Message = "Có lỗi xảy ra", Success = false };
             }
         }
     }

@@ -14,6 +14,7 @@ namespace Blog.Application.Catalog.CategoryService
     {
         // for ADMIN
 
+        Task<List<CategoryVm>> GetListCategories();
         Task<PagingResponse<List<CategoryVm>>> GetAllCategories(PagingRequest request);
         Task<JsonResponse> CreateCategory(CreateCategoryModel model);
         Task<JsonResponse> UpdateCategory(UpdateCategoryModel model);

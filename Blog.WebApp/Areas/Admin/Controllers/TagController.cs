@@ -2,6 +2,7 @@
 using Blog.Data.Entities;
 using Blog.ViewModel.Catalog.Tag;
 using Blog.ViewModel.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.WebApp.Areas.Admin.Controllers
