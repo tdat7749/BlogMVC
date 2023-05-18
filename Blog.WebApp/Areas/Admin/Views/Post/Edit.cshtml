@@ -7,7 +7,7 @@
 
 <h1>Cập Nhật Bài Viết</h1>
 
-<hr/>
+<hr />
 <form asp-action="Edit">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
@@ -62,13 +62,13 @@
     <div class="form-group">
         <label asp-for="Body" class="control-label"><span class="text-danger">*  </span>Trạng Thái</label>
         <select asp-for="IsPublished" id="published" class="form-control" asp-selected-value="@Model.IsPublished">
-            
+
             <option value=false>
-                    Ngưng Hoạt Động
-                </option>
+                Ngưng Hoạt Động
+            </option>
             <option value=true>
-                    Hoạt Động
-                </option>
+                Hoạt Động
+            </option>
         </select>
     </div>
     <div class="form-group">
@@ -105,7 +105,7 @@
                 reader.readAsDataURL(file);
                 return;
             }
-            $("#previewThumbnail").attr('src','/thumbnail/@Model.PreviewThumbnail');
+            $("#previewThumbnail").attr('src', '/thumbnail/@Model.PreviewThumbnail');
             swal.fire({
                 title: "Lỗi",
                 icon: "error",
@@ -137,28 +137,28 @@
                 return;
             }
 
-           var formData = new FormData()
-            formData.append('id',id)
-            formData.append('title',title)
-            formData.append('slug',slug)
-            formData.append('body',body)
-            formData.append('categoryId',categoryId)
-            formData.append('IsPublished',isPublished)
-            
-            formData.append('userId',1)
+            var formData = new FormData()
+            formData.append('id', id)
+            formData.append('title', title)
+            formData.append('slug', slug)
+            formData.append('body', body)
+            formData.append('categoryId', categoryId)
+            formData.append('IsPublished', isPublished)
 
-            tags.forEach(function(item){
-                formData.append('tags[]',parseInt(item))
+            formData.append('userId', 1)
+
+            tags.forEach(function(item) {
+                formData.append('tags[]', parseInt(item))
             })
 
-            if(thumbnail !== undefined){
-                formData.append('thumbnail',thumbnail)
+            if (thumbnail !== undefined) {
+                formData.append('thumbnail', thumbnail)
             }
 
             swal.fire({
                 title: 'Sửa Bài Viết',
-                text:'Bạn có chắc chắn muốn sửa bài viết không ?'
-                icon: 'question',
+                text: 'Bạn có chắc chắn muốn sửa bài viết không ?',
+                        icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Chắc chắn ',
                 cancelButtonText: 'Không',

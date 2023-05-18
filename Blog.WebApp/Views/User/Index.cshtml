@@ -1,0 +1,459 @@
+﻿@model Blog.Data.Entities.UserApplication
+@using System.Security.Claims
+
+@{
+    Layout = "_Layout";
+    var currentAction = ViewContext.RouteData.Values["action"].ToString();
+}
+
+
+<div class="w-[90%] mx-auto mt-10">
+    <div class="text-center">
+        <div class="avatar">
+            <div class="w-48 rounded-full">
+                <img src="/avatar/@Model.Avatar" id="previewAvatar" />
+            </div>
+        </div>
+        <form id="formAvatar">
+            <input type="file" id="avatar" onchange="previewAvatar(event)" class="file-input file-input-bordered file-input-primary w-full max-w-xs" /> <br>
+            <button class="btn hover:btn-primary mt-2" onclick="ChangeAvatar(event)">Cập Nhật</button>
+        </form>
+    </div>
+    <div class="divider"></div>
+    <div class="flex flex-col lg:flex-row lg:space-x-[3rem] mt-10">
+        <div class="flex flex-col space-y-4 flex-none">
+            <a id="btnBaiViet" class="btnHash btn hover:btn-primary" asp-fragment="tat-ca-bai-viet">Tất Cả Bài Viết</a>
+            <a id="btnThongTinCaNhan" class="btnHash btn hover:btn-primary" asp-fragment="thong-tin-ca-nhan">Thông Tin Tài Khoản</a>
+            <a id="btnDoiMatKhau" class="btnHash btn hover:btn-primary" asp-fragment="doi-mat-khau">Đổi Mật Khẩu</a>
+            <a id="btnTaoBaiViet" class="btnHash btn hover:btn-primary" asp-fragment="tao-bai-viet">Tạo Bài Viết</a>
+        </div>
+        <div id="partialViewContainer" class="flex-1 mt-10 lg:mt-0 w-full">
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/ckeditor/ckeditor.js"></script>
+    <script>
+
+        $(document).ready(function() {
+            var hash = window.location.hash;
+            if (hash) {
+                $(window).trigger("hashchange");
+            }
+        })
+
+        $(window).on("hashchange", function() {
+            const hash = window.location.hash
+
+            if (hash === "#thong-tin-ca-nhan") {
+                $.ajax({
+                    url: `@Url.Action("Information","User")`,
+                    type: "GET",
+                    success: function(response) {
+                        $("#partialViewContainer").html(response)
+                    }
+                })
+                $(".btnHash").removeClass("btn-primary")
+                $("#btnThongTinCaNhan").addClass("btn-primary")
+            }
+            if (hash === "#doi-mat-khau") {
+                $.ajax({
+                    url: `@Url.Action("ChangePassword","User")`,
+                    type: "GET",
+                    success: function(response) {
+                        $("#partialViewContainer").html(response)
+                    }
+                })
+                $(".btnHash").removeClass("btn-primary")
+                $("#btnDoiMatKhau").addClass("btn-primary")
+            }
+            if (hash === "#tat-ca-bai-viet") {
+                $.ajax({
+                    url: `@Url.Action("AllPosts","User")`,
+                    type: "GET",
+                    success: function(html) {
+                        $("#partialViewContainer").html(html)
+
+                        //nested ajax
+                        $.ajax({
+                            url: `@Url.Action("AllPost","User")`,
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({
+                                pageIndex: 1,
+                                userName: '@User.FindFirstValue("UserName")'
+                            }),
+                            success: function(response) {
+                                renderData(response)
+                                RenderPaging(response)
+                            },
+                            erorr: function() {
+                                swal.fire({
+                                    title: "Lỗi",
+                                    text: "Có lỗi xảy ra, vui lòng thử lại sau",
+                                    icon: "error"
+                                })
+                            }
+                        })
+                    }
+                })
+                $(".btnHash").removeClass("btn-primary")
+                $("#btnBaiViet").addClass("btn-primary")
+            }
+            if (hash === "#tao-bai-viet") {
+                $.ajax({
+                    url: `@Url.Action("CreatePost","User")`,
+                    type: "GET",
+                    success: function(response) {
+                        $("#partialViewContainer").html(response)
+
+                        CKEDITOR.replace('body', {
+                    filebrowserUploadUrl: "@Url.Action("UploadImage","FileStorage",new {Area = "Admin"})",
+                    filebrowserBrowseUrl: "@Url.Action("UploadExplorer","FileStorage",new {Area = "Admin"})"
+                 })
+                    }
+                })
+                $(".btnHash").removeClass("btn-primary")
+                $("#btnTaoBaiViet").addClass("btn-primary")
+            }
+        })
+
+        function renderData(response) {
+            $("#PostContainer").empty()
+            if(response?.data.length <= 0){
+                $("#PostContainer").append("<h2 class='text-neutral font-semibold text-2xl mt-4'>Bạn chưa có bài viết nào</h2>")
+            }
+            response?.data.map((item, index) => {
+                $("#PostContainer").append(`
+                <tr>
+                    <td>
+                        ${item.title}
+                        <br />
+                        <span class="badge badge-md text-md ${item.published === true ? 'badge-success' : 'badge-error'}">${item.published === true ? 'Đang Hoạt Động' : 'Ngưng Hoạt Động'}</span>
+                    </td>
+                    <td>
+                        ${item.firstName} ${item.lastName}
+                    </td>
+                    <td>${item.categoryName}</td>
+                    <td>${item.createdAt}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-xs">Chi Tiết</button>
+                    </td>
+                </tr>
+                `)
+            })
+        }
+
+                function RenderPaging(response){
+                    $("#BtnPaging").empty()
+                    for (let i = 1; i <= response.totalPage; i++) {
+                         $("#BtnPaging").append(`
+                              <button class= "btnPaging btn ${i === 1 ? 'btn-active' : ''}"onclick="Pagination(${i},event)">${i}</button>
+                          `)
+                    }
+                }
+
+                   function Pagination(index,event) {
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Action("AllPost","User")",
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                pageIndex: index,
+                                userName: '@User.FindFirstValue("UserName")'
+                            }),
+                            success: function(response) {
+                                renderData(response)
+                                $(".btnPaging").removeClass('btn-active')
+                                $(event.target).addClass('btn-active')
+                            }
+                        })
+                    }
+
+
+                function previewAvatar(e) {
+
+                    const file = e.target.files[0]
+
+                    if (file && file.type.includes("image/")) {
+                        var fileReader = new FileReader()
+
+                        fileReader.onload = function(e) {
+                            $("#previewAvatar").attr('src', e.target.result)
+                        }
+                        fileReader.readAsDataURL(file)
+                        return;
+                    }
+
+                    $("#previewAvatar").attr('src', "/avatar/@User.FindFirstValue("Avatar")")
+                    swal.fire({
+                        title: "Lỗi",
+                        text: "Hình ảnh không tồn tại",
+                        icon: "error"
+                    })
+
+                }
+
+                function ChangeAvatar(e) {
+                    e.preventDefault()
+
+                    const avatar = $("#avatar").prop("files")[0]
+                    const id = "@User.FindFirstValue("Id")"
+
+                    if (avatar === undefined) {
+                        swal.fire({
+                            title: 'Lỗi',
+                            text: 'Vui lòng chọn ảnh trước khi cập nhật',
+                            icon: 'error'
+                        })
+                        return
+                    }
+
+                    var formData = new FormData();
+                    formData.append('id', id)
+                    formData.append('avatar', avatar)
+
+                    $.ajax({
+                        type: 'PATCH',
+                        enctype: 'multipart/form-data',
+                        url: "@Url.Action("ChangeAvatar","User")",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: "Thành Công",
+                                    text: response.message,
+                                    icon: 'success'
+                                })
+                            } else {
+                                swal.fire({
+                                    title: "Thất Bại",
+                                    text: response.message,
+                                    icon: 'error'
+                                })
+                            }
+                        },
+
+                        error: function() {
+                            swal.fire({
+                                title: "Thất Bại",
+                                text: "Có lỗi xảy ra",
+                                icon: 'error'
+                            })
+                        }
+
+                    })
+                }
+
+                function ChangePassword(e) {
+                    e.preventDefault()
+                    const oldPassword = $("#oldPassword").val().trim()
+                    const newPassword = $("#newPassword").val().trim()
+                    const confirmPassword = $("#confirmPassword").val().trim()
+                    const id = "@User.FindFirstValue("Id")"
+
+                    if (oldPassword === "" || newPassword === "" || confirmPassword === "") {
+                        swal.fire({
+                            title: "Lỗi",
+                            text: "Vui lòng nhập đầy đủ thông tin",
+                            icon: "error"
+                        })
+                        return
+                    }
+
+                    $.ajax({
+                        type: "PATCH",
+                        url: "@Url.Action("ChangePassword","User")",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            oldPassword,
+                            newPassword,
+                            confirmPassword,
+                            id
+                        }),
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: "Thành Công",
+                                    text: response.message,
+                                    icon: "success"
+                                })
+                            } else {
+                                swal.fire({
+                                    title: "Thất Bại",
+                                    text: response.message,
+                                    icon: "error"
+                                })
+                            }
+                        },
+                        error: function() {
+                            swal.fire({
+                                title: "Thất Bại",
+                                text: "Có lỗi xảy ra, vui lòng thử lại sau",
+                                icon: "error"
+                            })
+                        }
+                    })
+                }
+
+                function submitEditUser(e) {
+                    e.preventDefault()
+                    const firstName = $("#firstName").val().trim()
+                    const lastName = $("#lastName").val().trim()
+                    const id = "@User.FindFirstValue("Id")"
+                    const email = $("#email").val().trim()
+                    const phoneNumber = $("#phoneNumber").val().trim()
+
+                    if (firstName === "" || lastName === "" || email === "" || phoneNumber === "") {
+                        swal.fire({
+                            title: "Lỗi",
+                            text: "Vui lòng không để trống những ô nhập có dấu *",
+                            icon: "error"
+                        })
+                        return;
+                    }
+
+                    const body = {
+                        firstName: firstName,
+                        lastName: lastName,
+                        id: id,
+                        email: email,
+                        phoneNumber: phoneNumber
+                    }
+
+                    swal.fire({
+                        title: 'Cập Nhật Thông Tin',
+                        text: 'Bạn chắc chắn muốn cập nhật thông tin ?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Chắc chắn',
+                        cancelButtonText: 'Không',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                type: 'PUT',
+                                url: "@Url.Action("Edit","User")",
+                                contentType: 'application/json',
+                                data: JSON.stringify(body),
+                                success: function(response) {
+                                    if (response.success === true) {
+                                        swal.fire({
+                                            title: response.message,
+                                            icon: 'success',
+                                        })
+                                    } else {
+                                        swal.fire({
+                                            title: response.message,
+                                            icon: 'error',
+                                        })
+                                    }
+                                }
+                            })
+                        }
+                    })
+                }
+
+
+
+                $(".btnHash").on('click',function(){
+                    $(".btnHash").removeClass("btn-primary")
+                    $(this).addClass("btn-primary")
+                })
+
+
+function onChangeImage(e) {
+    const file = e.target.files[0]
+    if (file && file.type.includes('image/')) {
+        var reader = new FileReader()
+
+        reader.onload = function(e) {
+            $("#previewThumbnail").attr('src', e.target.result);
+
+        }
+        reader.readAsDataURL(file);
+        return;
+    }
+    $("#previewThumbnail").attr('src', '#');
+    swal.fire({
+        title: "Lỗi",
+        icon: "error",
+        text: "File/Hình ảnh không tồn tại"
+    })
+}
+
+function createPost(e) {
+            e.preventDefault()
+            const title = $("#title").val()
+            const slug = $("#slug").val()
+            const body = CKEDITOR.instances['body'].getData()
+            const categoryId = parseInt($("#categoryId").val())
+            const thumbnail = $("#thumbnail").prop("files")[0];
+            const tags = [];
+            $(".tag:checked").each(function() {
+                  tags.push(parseInt($(this).val()))
+            })
+
+
+            if (slug === "" || title === "" || body === "" || categoryId === "" || tags.length <= 0 || thumbnail === undefined) {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng không để trống những ô nhập có dấu *",
+                    icon: "error"
+                })
+                return;
+            }
+
+            var formData = new FormData()
+            formData.append('title',title)
+            formData.append('slug',slug)
+            formData.append('body',body)
+            formData.append('categoryId',categoryId)
+            formData.append('thumbnail',thumbnail)
+            formData.append('userId','@User.FindFirstValue("Id")')
+
+            tags.forEach(function(item){
+                formData.append('tags[]',parseInt(item))
+            })
+
+
+
+            swal.fire({
+                title: 'Tạo Bài Viết',
+                text:'Bạn có chắc chắn muốn tạo bài viết này ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Chắc chắn ',
+                cancelButtonText: 'Không',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        enctype: 'multipart/form-data',
+                        url: "@Url.Action("Create","User")",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'success',
+                                })
+
+                            } else {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

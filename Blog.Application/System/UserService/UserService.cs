@@ -19,11 +19,13 @@ namespace Blog.Application.System.UserService
         private readonly UserManager<UserApplication> _userManager;
         private readonly IFileStorageService _fileStorageService;
         private readonly BlogDbContext _context;
-        public UserService(UserManager<UserApplication> userManager, IFileStorageService fileStorageService, BlogDbContext context)
+        private readonly SignInManager<UserApplication> _signInManager;
+        public UserService(UserManager<UserApplication> userManager, IFileStorageService fileStorageService, BlogDbContext context, SignInManager<UserApplication> signInManager)
         {
             _userManager = userManager;
             _fileStorageService = fileStorageService;
             _context = context;
+            _signInManager = signInManager;
         }
 
         public async Task<JsonResponse> BlockUser(string id)
@@ -88,8 +90,9 @@ namespace Blog.Application.System.UserService
                     _fileStorageService.DeleteAvatar(user.Avatar);
                 }
                 user.Avatar = await _fileStorageService.SaveAvatarAsync(model.Avatar, model.Id);
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
+                await _userManager.UpdateAsync(user);
+
+                await _signInManager.RefreshSignInAsync(user);
                 return new JsonResponse()
                 {
                     Message = "Đổi ảnh đại diện thành công",
@@ -105,6 +108,55 @@ namespace Blog.Application.System.UserService
                     Success = false
                 };
             } 
+        }
+
+        public async Task<JsonResponse> ChangePassword(ChangePasswordModel model)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(model.Id);
+                if (user == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = "Tài khoản không tồn tại hoặc bị lỗi",
+                        Success = false
+                    };
+                }
+
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = "Mật khẩu và mật khẩu xác thực không trùng khớp",
+                        Success = false
+                    };
+                }
+
+                var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                if (!result.Succeeded)
+                {
+                    return new JsonResponse()
+                    {
+                        Success = false,
+                        Message = result.Errors.Select(x => x.Description).FirstOrDefault()
+                    };
+                }
+
+                return new JsonResponse()
+                {
+                    Message = "Đổi mật khẩu thành công",
+                    Success = true
+                };
+            }
+            catch (Exception)
+            {
+                return new JsonResponse()
+                {
+                    Message = "Có lỗi xảy ra, vui lòng thử lại sau",
+                    Success = false
+                };
+            }
         }
 
         public async Task<PagingResponse<List<UserVm>>> GetAllUser(PagingRequest request)
@@ -173,6 +225,33 @@ namespace Blog.Application.System.UserService
             }
         }
 
+        public async Task<UserVm> GetUserByUserName(string userName)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userName);
+                if (user == null)
+                {
+                    return null;
+                }
+
+                var userVm = new UserVm()
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Avatar = user.Avatar,
+                    PhoneNumber = user.PhoneNumber
+                };
+                return userVm;
+            }
+            catch (Exception)
+            {
+                throw new Exception();
+            }
+        }
 
         public async Task<JsonResponse> UnBlockUser(string id)
         {

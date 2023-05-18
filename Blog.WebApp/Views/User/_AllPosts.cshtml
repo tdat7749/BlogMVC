@@ -1,0 +1,34 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+
+
+<h1 class="font-semibold text-neutral text-4xl">Tất Cả Bài Viết</h1>
+<div class="mt-10">
+    <a asp-action="Index" asp-controller="User" asp-fragment="tao-bai-viet" class="my-2 btn hover:btn-primary">Tạo Bài Viết</a>
+    <div class="overflow-x-auto w-full">
+        <table class="table w-full">
+            <!-- head -->
+            <thead >
+                <tr>
+                    <th class="bg-neutral text-lg text-neutral-content w-[30%]">Tựa Đề</th>
+                    <th class="bg-neutral text-lg text-neutral-content">Tác Giả</th>
+                    <th class="bg-neutral text-lg text-neutral-content">Danh Mục</th>
+                    <th class="bg-neutral text-lg text-neutral-content">Ngày Viết</th>
+                    <th class="bg-neutral"></th>
+                </tr>
+            </thead>
+            <tbody id="PostContainer">
+                <!-- row 1 -->
+                
+            </tbody>
+        </table>
+    </div>
+    <div class="text-right">
+        <div id="BtnPaging" class="btn-group mt-[2rem] text-right">
+        </div>
+    </div>
+</div>

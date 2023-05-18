@@ -13,5 +13,6 @@ namespace Blog.ViewModel.System.Authentication
         public string ConfirmPassword { get; set; }
         public string FirstName { get; set; }
         public string Lastname { get; set; }
+        public string Email { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Blog.Application.Common.FileStorageService;
+﻿using Blog.Application.Catalog.PostService;
+using Blog.Application.Common.FileStorageService;
 using Blog.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -7,38 +8,26 @@ namespace Blog.WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IFileStorageService _fileStorageService;
 
-        public HomeController(IFileStorageService fileStorageService)
+        private readonly IPostService _postService;
+        public HomeController(IPostService postService)
         {
-            _fileStorageService = fileStorageService;
+            _postService = postService;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
+            ViewData["ListLatestPort"] = await _postService.GetPostLatest();
             return View();
         }
 
+        [HttpGet]
         public IActionResult Privacy()
         {
             return View();
         }
 
-        [HttpGet]
-        public IActionResult UploadExplorer()
-        {
-            var dir = _fileStorageService.FileExplorer();
-            ViewBag.DirInfo = dir.GetFiles();
-            return View();
-        }
-
-        [HttpPost]
-        public JsonResult UploadImage(IFormFile upload)
-        {
-            var result = _fileStorageService.UploadImageAsync(upload);
-            return new JsonResult(result);
-
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

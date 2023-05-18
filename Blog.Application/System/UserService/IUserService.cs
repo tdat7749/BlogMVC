@@ -19,7 +19,9 @@ namespace Blog.Application.System.UserService
         public Task<JsonResponse> BlockUser(string id);
         public Task<JsonResponse> UnBlockUser(string id);
         public Task<JsonResponse> ChangeAvatar(ChangeUserAvatarModel model);
+        public Task<UserVm> GetUserByUserName(string userName);
 
+        public Task<JsonResponse> ChangePassword(ChangePasswordModel model);
 
     }
 }

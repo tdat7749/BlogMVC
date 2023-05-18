@@ -3,11 +3,14 @@ using Blog.Application.Catalog.PostService;
 using Blog.Application.Catalog.TagService;
 using Blog.Application.Common.FileStorageService;
 using Blog.Application.System.AuthenService;
+using Blog.Application.System.CommentService;
 using Blog.Application.System.RoleService;
 using Blog.Application.System.UserService;
 using Blog.Data.EF;
 using Blog.Data.Entities;
+using Blog.ViewModel.Custom;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,12 +31,15 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 
 
 builder.Services.AddIdentity<UserApplication, IdentityRole>()
     .AddEntityFrameworkStores<BlogDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<CustomIdentityErrrorDescriber>();
+
 
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -99,15 +105,31 @@ app.UseAuthorization();
 
 
 //RequireAuthorization ở dưới là đăng ký policy(chính sách) Admin cho Route này.
-app.MapControllerRoute(
+
+app.UseEndpoints(endpoint =>
+{
+    endpoint.MapAreaControllerRoute(
       name: "Admin",
-      pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+      areaName: "Admin",
+      pattern: "Admin/{controller=Home}/{action=Index}/{id?}"
 ).RequireAuthorization("Admin");
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
-);
 
+    endpoint.MapControllerRoute(
+        name: "Blog",
+        pattern: "{controller=Blog}/{action=Index}/{slug}"
+    );
+
+    endpoint.MapControllerRoute(
+        name: "Author",
+        pattern: "{controller=Author}/{action=Index}/{username}"
+    );
+
+    endpoint.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}"
+    );
+
+});
 
 app.Run();

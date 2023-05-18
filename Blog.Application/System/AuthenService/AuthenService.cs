@@ -8,25 +8,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace Blog.Application.System.AuthenService
 {
     public class AuthenService : IAuthenService
     {
         private readonly BlogDbContext _context;
-        private readonly UserManager<UserApplication> _userManage;
+        private readonly UserManager<UserApplication> _userManager;
         private readonly SignInManager<UserApplication> _signInManager;
 
         public AuthenService(BlogDbContext context, UserManager<UserApplication> userManage, SignInManager<UserApplication> signInManager)
         {
             _context = context;
-            _userManage = userManage;
+            _userManager = userManage;
             _signInManager = signInManager;
         }
 
         public async Task<JsonResponse> Login(LoginModel model)
         {
-            try {
+            try
+            {
                 // Mã hóa thông tin người dùng thành Base64
 
                 //var userNameBytes = Encoding.UTF8.GetBytes(model.UserName);
@@ -34,28 +36,40 @@ namespace Blog.Application.System.AuthenService
                 //var userNameBase64 = Convert.ToBase64String(userNameBytes);
                 //var passwordBase64 = Convert.ToBase64String(passwordBytes);
 
-                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false);
+                var user = await _userManager.FindByNameAsync(model.UserName);
+
+
+                if (user == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = "Tài khoản không tồn tại",
+                        Success = false
+                    };
+                }
+
+                var claims = new List<Claim>()
+                    {
+                    new Claim("FirstName",user.FirstName),
+                    new Claim("LastName",user.LastName),
+                    new Claim("Email",user.Email),
+                    new Claim("Id",user.Id),
+                    new Claim("UserName",user.UserName),
+                    new Claim("Avatar",user.Avatar),
+                    new Claim("PhoneNumber",user.PhoneNumber)
+                    };
+
+                await _userManager.AddClaimsAsync(user, claims);
+
+                var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+
                 if (!result.Succeeded)
                 {
-                    var user = await _userManage.FindByNameAsync(model.UserName);
-                    if (user == null)
+                    return new JsonResponse()
                     {
-                        return new JsonResponse()
-                        {
-                            Message = "Tài khoản không tồn tại",
-                            Success = false
-                        };
-                    }
-                    result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe,false);
-
-                    if (!result.Succeeded)
-                    {
-                        return new JsonResponse()
-                        {
-                            Message = "Sai mật khẩu",
-                            Success = false
-                        };
-                    }
+                        Message = "Sai tài khoản hoặc mật khẩu",
+                        Success = false
+                    };
                 }
 
                 if (result.IsLockedOut)
@@ -88,9 +102,61 @@ namespace Blog.Application.System.AuthenService
             throw new NotImplementedException();
         }
 
-        public Task<JsonResponse> Register(RegisterModel model)
+        public async Task<JsonResponse> Register(RegisterModel model)
         {
-            throw new NotImplementedException();
+            var checkUser = await _userManager.FindByNameAsync(model.UserName);
+            if(checkUser != null)
+            {
+                return new JsonResponse()
+                {
+                    Message = "Tài khoản này đã tồn tại",
+                    Success = false
+                };
+            }
+
+            var checkEmailUser = await _userManager.FindByEmailAsync(model.Email);
+            if(checkEmailUser != null)
+            {
+                return new JsonResponse()
+                {
+                    Message = "Email này đã tồn tại",
+                    Success = false
+                };
+            }
+
+            if(model.Password != model.ConfirmPassword)
+            {
+                return new JsonResponse()
+                {
+                    Message = "Mật khẩu và xác nhận mật khẩu không khớp",
+                    Success = false
+                };
+            }
+
+            var newUser = new UserApplication()
+            {
+                UserName = model.UserName,
+                FirstName = model.FirstName,
+                LastName = model.Lastname,
+                Email = model.Email,
+                Avatar = "abc.jpg"
+            };
+
+            var user = await _userManager.CreateAsync(newUser,model.Password);
+            if (!user.Succeeded)
+            {
+                return new JsonResponse()
+                {
+                    Message = "Đăng ký thất bại, vui lòng thử lại sau",
+                    Success = false
+                };
+            }
+
+            return new JsonResponse()
+            {
+                Message = "Đăng ký thành công",
+                Success = true
+            };
         }
     }
 }

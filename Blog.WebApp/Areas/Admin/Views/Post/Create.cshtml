@@ -1,4 +1,5 @@
-﻿@model Blog.ViewModel.Catalog.Post.CreatePostModel
+﻿@using System.Security.Claims
+@model Blog.ViewModel.Catalog.Post.CreatePostModel
 
 @{
     ViewData["Title"] = "Create";
@@ -76,7 +77,6 @@
     </script>
 
     <script>
-
         function onChangeImage(e){
             const file = e.target.files[0]
             if(file && file.type.includes('image/')){
@@ -125,7 +125,7 @@
             formData.append('body',body)
             formData.append('categoryId',categoryId)
             formData.append('thumbnail',thumbnail)
-            formData.append('userId',1)
+            formData.append('userId','@User.FindFirstValue("Id")')
 
             tags.forEach(function(item){
                 formData.append('tags[]',parseInt(item))
@@ -134,7 +134,7 @@
 
             swal.fire({
                 title: 'Tạo Bài Viết',
-                text:'Bạn có chắc chắn muốn tạo bài viết này ?'
+                text:'Bạn có chắc chắn muốn tạo bài viết này ?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Chắc chắn ',

@@ -1,0 +1,45 @@
+﻿@using System.Security.Claims
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@model Blog.Data.Entities.UserApplication
+
+<h1 class="font-semibold text-4xl text-neutral">Thông Tin Cá Nhân</h1>
+<div class="mt-10">
+    <form class="space-y-[1rem]">
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="UserName" class="label">
+                <span class="label-text text-xl font-semibold ">Tài Khoản</span>
+            </label>
+            <input asp-for="UserName" type="text" placeholder="Tài Khoản" id="userName" value="@Model.UserName" class="input input-bordered w-full" disabled />
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="FirstName" class="label">
+                <span class="label-text text-xl font-semibold ">Họ</span>
+            </label>
+            <input asp-for="FirstName" type="text" placeholder="Họ" id="firstName" value="@Model.FirstName" class="input input-bordered w-full" />
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="LastName" class="label">
+                <span class="label-text text-xl font-semibold ">Tên</span>
+            </label>
+            <input asp-for="LastName" type="text" placeholder="Tên" id="lastName" value="@Model.LastName" class="input input-bordered w-full" />
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="Email" class="label">
+                <span class="label-text text-xl font-semibold ">Email</span>
+            </label>
+            <input asp-for="Email" type="email" placeholder="Email" id="email" value="@Model.Email" class="input input-bordered w-full" />
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="PhoneNumber" class="label">
+                <span class="label-text text-xl font-semibold ">Số Điện Thoại</span>
+            </label>
+            <input asp-for="PhoneNumber" type="text" placeholder="Số Diện Thoại" id="phoneNumber" value="@Model.PhoneNumber" class="input input-bordered w-full" />
+        </div>
+        <div>
+            <button class="btn btn-primary" onclick="submitEditUser(event)">Cập Nhật Thông Tin</button>
+        </div>
+    </form>
+</div>

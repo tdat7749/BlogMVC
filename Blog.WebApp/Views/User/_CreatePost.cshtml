@@ -1,0 +1,69 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model Blog.ViewModel.Catalog.Post.CreatePostModel
+@{
+    Layout = null;
+}
+<h1 class="font-semibold text-neutral text-4xl">Tạo Bài Viết</h1>
+<div class="mt-10">
+    <form class="space-y-[1rem]">
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="Title" class="label">
+                <span class="label-text text-xl font-semibold ">Tiêu Đề</span>
+            </label>
+            <input asp-for="Title" type="text" id="title" placeholder="Tiêu Đề" class="input input-bordered w-full" />
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="Slug" class="label">
+                <span class="label-text text-xl font-semibold ">Slug</span>
+            </label>
+            <input asp-for="Slug" type="text" id="slug" placeholder="Tiêu Đề" class="input input-bordered w-full" />
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="Thumbnail" class="label">
+                <span class="label-text text-xl font-semibold ">Hình Ảnh</span>
+            </label>
+            <input asp-for="Thumbnail" type="file" onchange="onChangeImage(event)" id="thumbnail" class="file-input file-input-bordered w-full" />
+            <img src="#" alt="thumbnail" id="previewThumbnail" class="w-25 h-25 object-fit-cover" />
+        </div>
+
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="CategoryId" class="label">
+                <span class="label-text text-xl font-semibold ">Danh Mục</span>
+            </label>
+            <select asp-for="CategoryId" id="categoryId" class="select select-bordered w-full">
+                @foreach (var item in ViewBag.ListCategories)
+                {
+                    <option value=@item.Id>
+                        @item.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Body" class="label">
+                <span class="label-text text-xl font-semibold ">Nội Dung</span>
+            </label>
+            <textarea asp-for="Body" class="input input-bordered w-full" id="body"></textarea>
+        </div>
+        <div class="form-control w-full lg:w-[50%]">
+            <label asp-for="Tags" class="label">
+                <span class="label-text text-xl font-semibold ">Tag</span>
+            </label>
+            @foreach (var item in ViewBag.ListTags)
+            {
+                <div class="form-check">
+                    <label asp-for="Tags" class="label cursor-pointer">
+                        <span class="">@item.Name</span>
+                        <input class="tag checkbox" type="checkbox" value="@item.Id">
+                    </label>
+                </div>
+            }
+        </div>
+        <div class="form-group">
+            <button onclick="createPost(event)" class="btn btn-primary">Tạo Bài Viết</button>
+        </div>
+    </form>
+</div>

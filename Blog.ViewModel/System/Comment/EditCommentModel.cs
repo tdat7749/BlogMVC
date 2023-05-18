@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.ViewModel.Common
+namespace Blog.ViewModel.System.Comment
 {
-    public class SelectedItem
+    public class EditCommentModel
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public bool Selected { get; set; }
+        public string Comment { get; set; }
+
     }
 }

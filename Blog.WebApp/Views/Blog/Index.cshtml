@@ -1,0 +1,355 @@
+﻿@using System.Security.Claims
+@model Blog.ViewModel.Catalog.Post.PostVm
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<main class="w-[90%] mx-auto mt-10">
+    <div class="w-full md:w-[70%] h-[250px] flex flex-col justify-center bg-neutral text-neutral-content rounded-md p-10 mx-auto">
+        <div class="flex items-center gap-4 mt-10">
+            <div class="avatar">
+                <div class="w-24 rounded-full">
+                    <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
+                        <img src="/avatar/@Model.Avatar" />
+                    </a>
+                </div>
+            </div>
+            <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
+                        <h3 class="font-semibold text-xl">@Model.FirstName  @Model.LastName</h3>
+                    </a>
+        </div>
+        <div>
+            <p class="text-xl font-semibold">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
+        </div>
+    </div>
+    <div class="content mt-10">
+        <h1 class="text-4xl font-bold text-neutral">@Model.Title</h1>
+
+        <div class="flex items-center gap-4 mt-10">
+            <div class="avatar">
+                <div class="w-24 rounded-full">
+                    <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
+                        <img src="/avatar/@Model.Avatar" />
+                    </a>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
+                        <h3 class="font-semibold text-xl">@Model.FirstName  @Model.LastName</h3>
+                    </a>
+                <p class="text-base-300 font-semibold text-lg">@Model.CreatedAt</p>
+            </div>
+        </div>
+
+        <section class="content-body mt-10">
+            @Html.Raw(Model.Body)
+        </section>
+    </div>
+
+    <div class="divider font-bold text-2xl mt-[3rem]">BÌNH LUẬN</div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="mt-[3rem]">
+            <div class="flex items-center gap-4 my-10">
+                <div class="avatar">
+                    <div class="w-24 rounded-full">
+                        <img src="/avatar/@User.FindFirstValue("Avatar")" />
+                    </div>
+                </div>
+                <h3 class="font-semibold text-xl">@User.FindFirstValue("FirstName")  @User.FindFirstValue("LastName")</h3>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+                <input id="commentValue" type="text" placeholder="Viết bình luận của bạn ở đây" class="w-full lg:w-[50%] input input-bordered" />
+                <button id="btnAddComment" class="btn btn-primary" onclick="AddComment()">
+                    Bình Luận
+                </button>
+            </div>
+        </div>
+    }
+
+    <div id="commentContainer" class="flex flex-col space-y-[2rem]">
+    </div>
+</main>
+
+
+
+@section Scripts{
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetComment","Comment")",
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    pageIndex: 1,
+                    postId: @Model.Id,
+                }),
+                success: function(response) {
+                    renderComment(response?.data)
+                }
+            })
+        })
+
+
+        function renderComment(comments) {
+            $("#commentContainer").empty()
+            comments.map((item, index) => {
+                $("#commentContainer").append(`
+                                                                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                                                                <div class="flex-1">
+                                                                                <div class="flex items-center gap-4 my-2">
+                                                                                    <div class="avatar">
+                                                                                        <div class="w-10 rounded-full">
+                                                                                            <img src="/avatar/${item.avatar}" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <h3 class="font-semibold text-md">${item.firstName}  ${item.lastName} </h3>
+                                                                                </div>
+                                                                                <div class="commentBlockContent" data-id="${item.id}" ">
+                                                                                    <p class="text-neutral text-lg font-medium">${item.comment} </p>
+                                                                                </div>
+                                                                                </div >
+                                                                                <div>
+                                                                                    <button data-id="${item.id}" onclick="ShowFormEdit(event,'${item.comment}')"  class='btnEdit btn btn-primary  ${item.userId === '@User?.FindFirstValue("Id")' ? '' : 'hidden'}'>Sửa</button>
+                                                                                    <button onclick="DeleteComment(${item.id})"  class='btn btn-error ${item.userId === '@User?.FindFirstValue("Id")' ? '' : 'hidden'}'>Xóa</button>
+                                                                                </div>
+                                                                            </div>
+                                                                        `)
+            })
+        }
+
+
+        function DeleteComment(id) {
+            Swal.fire({
+                title: 'Xóa Bình Luận',
+                text: 'Bạn muốn xóa bình luận này ?',
+                icon: 'question',
+                showCancelButton: true,
+                cancelButtonText: 'Không',
+                confirmButtonText: 'Có'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "@Url.Action("Delete","Comment")",
+                        type: "DELETE",
+                        contentType: 'application/json',
+                        data: JSON.stringify(id),
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: 'Thành Công',
+                                    text: response.message,
+                                    icon: 'success'
+                                })
+                                Pagination(1)
+                            } else {
+                                swal.fire({
+                                    title: 'Thất Bại',
+                                    text: response.message,
+                                    icon: 'error'
+                                })
+                            }
+                        },
+                        error: function() {
+                            swal.fire({
+                                title: 'Lỗi',
+                                text: 'Có lỗi xảy ra, vui lòng thử lại sau',
+                                icon: 'error'
+                            })
+                        }
+                    })
+                }
+            })
+        }
+
+        function Pagination(index) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetComment","Comment")",
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    pageIndex: index,
+                    postId: @Model.Id
+                                }),
+                success: function(response) {
+                    renderComment(response?.data)
+                }
+            })
+        }
+
+        function AddComment() {
+            let isLoggin = "@User.Identity.IsAuthenticated".toLowerCase() // cái này trả về False chứ không phải false
+            isLoggin = isLoggin === "true" ? true : false
+            if (!isLoggin) {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng đăng nhập trước khi bình luận",
+                    showCancelButton: true,
+                    cancelButtonText: "Không",
+                    confirmButtonText: "Đăng Nhập",
+                    icon: "error"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        window.location = "@Url.Action("Index","Login")"
+                    }
+                })
+                return;
+            }
+
+
+            const comment = $("#commentValue").val().trim()
+
+            if (comment === "") {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng viết bình luận",
+                    icon: "error"
+                })
+                return;
+            }
+
+            const data = {
+                comment: comment,
+                postId: @Model.Id,
+                userId: '@User.FindFirstValue("Id")'
+            }
+
+            $("#btnAddComment").addClass("loading")
+            $("#btnAddComment").attr('disabled', true)
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Add","Comment")",
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success === true) {
+                        swal.fire({
+                            title: "Thành Công",
+                            text: response.message,
+                            icon: "success"
+                        })
+                        Pagination(1)
+                    } else {
+                        swal.fire({
+                            title: "Thất Bại",
+                            text: response.message,
+                            icon: "error"
+                        })
+                    }
+                    $("#btnAddComment").removeClass("loading")
+                    $("#btnAddComment").removeAttr('disabled')
+                },
+                erorr: function() {
+                    swal.fire({
+                        title: "Lỗi",
+                        text: "Có lỗi xảy ra, vui lòng thử lại sau",
+                        icon: "error"
+                    })
+                    $("#btnAddComment").removeClass("loading")
+                    $("#btnAddComment").removeAttr('disabled')
+                }
+
+            })
+        }
+
+        function ShowFormEdit(e, value) {
+            const clickedElement = e.target
+            const idComment = $(clickedElement).data("id")
+            $(clickedElement).attr('disabled', true)
+
+            $(".commentBlockContent").each(function() {
+                console.log($(this).data("id"))
+                if (idComment === $(this).data("id")) {
+                    $(this).empty()
+                    $(this).append(`
+                                                <div class="flex items-center gap-4">
+                                            <input id="commentContentEdit" value="${value}" type="text" class="w-full lg:w-[50%] input input-bordered" />
+                                            <div class="flex items-center gap-2">
+                                            <button  class="btn btn-primary" onclick="EditComment(${idComment})">
+                                                Cập Nhật
+                                            </button>
+                                            <button data-id="${idComment}" onclick="HiddenFormEdit(event,'${value}')"  class="btn btn-secondary">
+                                                X
+                                            </button>
+                                            </div>
+                                        </div>
+                                            `)
+                }
+            })
+        }
+
+        function HiddenFormEdit(e, value) {
+            const idComment = $(e.target).data("id")
+
+            $(".commentBlockContent").each(function() {
+                if (idComment === $(this).data("id")) {
+                    $(this).empty()
+                    $(this).append(`
+                                               <p class="text-neutral text-lg font-medium">${value} </p>
+                                            `)
+                }
+            })
+
+            $(".btnEdit").removeAttr('disabled')
+        }
+
+        function EditComment(idComment) {
+            const comment = $("#commentContentEdit").val().trim()
+            if (comment === "") {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng viết comment",
+                    icon: "error"
+                })
+            }
+
+            const data = {
+                id: idComment,
+                comment: comment
+            }
+
+            $.ajax({
+                type: "PUT",
+                url: "@Url.Action("Edit","Comment")",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success === true) {
+                        swal.fire({
+                            title: "Thành Công",
+                            text: response.message,
+                            icon: "success"
+                        })
+                        $(".commentBlockContent").each(function() {
+                            if (idComment === $(this).data("id")) {
+                                $(this).empty()
+                                $(this).append(`
+                                               <p class="text-neutral text-lg font-medium">${comment} </p>
+                                            `)
+                            }
+                        })
+                        $(".btnEdit").removeAttr('disabled')
+                    } else {
+                        swal.fire({
+                            title: "Thất Bại",
+                            text: response.message,
+                            icon: "error"
+                        })
+                    }
+                },
+                error: function() {
+                    swal.fire({
+                        title: "Lỗi",
+                        text: "Có lỗi xảy ra, vui lòng thử lại sau",
+                        icon: "error"
+                    })
+                }
+            })
+        }
+
+    </script>
+}

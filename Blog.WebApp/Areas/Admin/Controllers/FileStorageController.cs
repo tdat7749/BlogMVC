@@ -1,9 +1,11 @@
 ﻿using Blog.Application.Common.FileStorageService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.WebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AllowAnonymous]
     public class FileStorageController : Controller
     {
         private readonly IFileStorageService _fileStorageService;

@@ -25,6 +25,12 @@ namespace Blog.Application.Catalog.PostService
         Task<List<PostListVm>> GetPostLatest();
         Task<PostVm> GetPostBySlug(string slug);
 
+        // Hàm này để cho người khác vào xem trang cá nhân của tác giả thì hiện lên (chỉ hiện thị những bài public)
+        Task<PagingResponse<List<PostListVm>>> GetListPostsUser(PagingRequest request);
+
+        // Hàm này hiển thị các bài viết của bản thân tài khoản
+        Task<PagingResponse<List<PostListVm>>> GetListPostPersonal(PagingRequest request);
+        Task<List<PostListVm>> GetPostMostView();
         void PlusViewPost(int id);
 
     }

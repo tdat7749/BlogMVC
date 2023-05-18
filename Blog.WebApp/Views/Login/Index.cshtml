@@ -1,0 +1,89 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+
+<div class="relative flex flex-col items-center justify-center h-screen overflow-hidden">
+    <div class="w-full p-6 bg-white border-t-4 border-gray-600 rounded-md shadow-md border-top lg:max-w-lg">
+        <h1 class="text-3xl font-semibold text-center text-gray-700">Thien Dat Blog</h1>
+        <form class="space-y-4">
+            <div>
+                <label class="label">
+                    <span class="text-base label-text">Tài Khoản</span>
+                </label>
+                <input type="text" id="userName" name="userName" placeholder="yasuohasagi_vippro2010" class="w-full input input-bordered" />
+            </div>
+            <div>
+                <label class="label">
+                    <span class="text-base label-text">Mật Khẩu</span>
+                </label>
+                <input type="password" id="password" name="password" placeholder="yasuohasagi_rankmaster_1992"
+                       class="w-full input input-bordered" />
+            </div>
+            <div>
+                <input id="rememberMe" type="checkbox" name="rememberMe" /> Ghi nhớ đăng nhập
+            </div>
+            <a asp-action="Index" asp-controller="ForgotPassword" class="text-xs text-gray-600 hover:underline hover:text-blue-600 my-2">Quên mật khẩu?</a>
+            <a asp-action="Index" asp-controller="Register" class="text-xs text-gray-600 hover:underline hover:text-blue-600 my-2">Đăng Ký</a>
+            <div>
+                <button onclick="login(event)" class="btn btn-primary">Đăng Nhập</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        function login(e) {
+            e.preventDefault();
+            const userName = $("#userName").val().trim()
+            const password = $("#password").val().trim()
+            const rememberMe = $("#rememberMe").prop('checked')
+
+            if (userName === "" || password === "") {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng điền đầy đủ",
+                    icon: "error",
+                })
+                return;
+            }
+
+            const body = {
+                userName: userName,
+                password: password,
+                rememberMe: rememberMe
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Login","Login")",
+                contentType: "application/json",
+                data: JSON.stringify(body),
+                success: function(response) {
+                    if (response.success === true) {
+                        swal.fire({
+                            title: "Thành Công",
+                            text: response.message,
+                            icon: "success",
+                            timer: 2000
+                        })
+                        window.location = "@Url.Action("Index","Home")"
+                    } else {
+                        swal.fire({
+                            title: "Thất Bại",
+                            text: response.message,
+                            icon: "error",
+                        })
+                    }
+                },
+                error: function() {
+                    swal.fire({
+                        title: "Thất Bại",
+                        text: "Có lỗi xảy ra, vui lòng thử lại sau",
+                        icon: "error",
+                    })
+                }
+            })
+        }
+    </script>
+}
