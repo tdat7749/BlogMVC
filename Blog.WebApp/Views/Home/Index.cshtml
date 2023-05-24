@@ -3,6 +3,7 @@
     ViewData["Title"] = "Home Page";
 
     var listLatestPost = ViewData["ListLatestPort"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
+    var listMostView = ViewData["ListMostView"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
 }
 
 
@@ -56,22 +57,27 @@
     </div>
     </div>
 
-    <div class="divider font-bold text-2xl ">BÀI VIẾT MỚI NHẤT</div> 
+    <div class="divider font-bold text-2xl "></div> 
 
-    <div class="content">
-        <div class="flex flex-col gap-10">
+    <div class="content flex space-x-[2rem]">
+        <div class="space-y-[2rem]">
+            <h1 class="text-neutral font-semibold text-3xl">Bài Viết Mới Nhất</h1>
+            <hr class="my-[2rem]" />
             @foreach (var item in listLatestPost)
             {
                 <div class="flex flex-col lg:flex-row gap-10">
-                <img src="/thumbnail/@item.Thumbnail" class="w-full max-w-[600px] lg:min-w-[600px] h-[300px] object-cover hover:cursor-pointer hover:opacity-90 duration-300"/>
+                <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug">
+                    <img src="/thumbnail/@item.Thumbnail" class="w-full max-w-[400] lg:min-w-[400px] rounded-sm h-[250px] hover:cursor-pointer hover:opacity-90 duration-300"/>
+                </a>
                 <div class="flex flex-col h-[300px]">
-                    <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug" class="text-3xl my-2 font-bold text-neutral">@item.Title</a>
-                    <h4 class="text-lg my-2 font-medium text-base-300 ">@item.CategoryName / @item.CreatedAt</h4>
-                    <p class="text-xl my-2 font-medium text-base-content">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
+                    <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug" class="text-xl my-2 font-bold text-neutral">@item.Title</a>
+                    <h4 class="text-md my-2 font-medium text-base-300 ">@item.CategoryName / @item.CreatedAt</h4>
+                    <p class="text-lg my-2 font-medium text-base-content">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
                 </div>
             </div>
             }
         </div>
+        @await Html.PartialAsync("_MostViewPost", listMostView)
     </div>
 </div>
 </main>

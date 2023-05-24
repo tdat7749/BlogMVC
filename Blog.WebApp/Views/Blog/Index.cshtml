@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var listMostView = ViewData["ListMostView"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
 }
 
 
@@ -18,35 +19,46 @@
                 </div>
             </div>
             <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
-                        <h3 class="font-semibold text-xl">@Model.FirstName  @Model.LastName</h3>
-                    </a>
+                <h3 class="font-semibold text-xl">@Model.FirstName  @Model.LastName</h3>
+            </a>
         </div>
         <div>
             <p class="text-xl font-semibold">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
         </div>
     </div>
-    <div class="content mt-10">
-        <h1 class="text-4xl font-bold text-neutral">@Model.Title</h1>
+    <div class="flex mt-10 space-x-[4rem]">
+        <div class="content flex-1">
+            <h1 class="text-4xl font-bold text-neutral">@Model.Title</h1>
 
-        <div class="flex items-center gap-4 mt-10">
-            <div class="avatar">
-                <div class="w-24 rounded-full">
-                    <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
-                        <img src="/avatar/@Model.Avatar" />
-                    </a>
+            <div class="flex items-center gap-4 mt-10">
+                <div class="avatar">
+                    <div class="w-24 rounded-full">
+                        <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
+                            <img src="/avatar/@Model.Avatar" />
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="flex flex-col gap-2">
-                <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
+                <div class="flex flex-col gap-2">
+                    <a asp-action="Index" asp-controller="Author" asp-route-username="@Model.UserName">
                         <h3 class="font-semibold text-xl">@Model.FirstName  @Model.LastName</h3>
                     </a>
-                <p class="text-base-300 font-semibold text-lg">@Model.CreatedAt</p>
+                    <p class="text-base-300 font-semibold text-lg">@Model.CreatedAt</p>
+                </div>
+            </div>
+
+            <section class="content-body mt-10">
+                @Html.Raw(Model.Body)
+            </section>
+
+            <div class="flex space-x-10 items-center mt-[1rem]">
+                <h3 class="text-xl text-neutral font-semibold">Tags : </h3>
+                @foreach(var item in @Model.ListTags)
+                {
+                    <a asp-action="Tag" asp-controller="Search" asp-route-slug="@item.Slug" class="btn btn-neutral">@item.Name</a>
+                }
             </div>
         </div>
-
-        <section class="content-body mt-10">
-            @Html.Raw(Model.Body)
-        </section>
+        @await Html.PartialAsync("_MostViewPost",listMostView)
     </div>
 
     <div class="divider font-bold text-2xl mt-[3rem]">BÌNH LUẬN</div>
@@ -71,13 +83,21 @@
         </div>
     }
 
-    <div id="commentContainer" class="flex flex-col space-y-[2rem]">
+    <div>
+        <div id="commentContainer" class="flex flex-col space-y-[2rem]">
+    </div>
+    <div class="text-right">
+            <div id="BtnPaging" class="btn-group mt-[2rem] text-right">
+            </div>
+        </div>
     </div>
 </main>
 
 
 
 @section Scripts{
+    <script src="~/js/client/blogController.js"></script>
+
     <script>
         $(document).ready(function() {
             $.ajax({
@@ -90,37 +110,10 @@
                 }),
                 success: function(response) {
                     renderComment(response?.data)
+                    RenderPaging(response)
                 }
             })
         })
-
-
-        function renderComment(comments) {
-            $("#commentContainer").empty()
-            comments.map((item, index) => {
-                $("#commentContainer").append(`
-                                                                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                                                                                <div class="flex-1">
-                                                                                <div class="flex items-center gap-4 my-2">
-                                                                                    <div class="avatar">
-                                                                                        <div class="w-10 rounded-full">
-                                                                                            <img src="/avatar/${item.avatar}" />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <h3 class="font-semibold text-md">${item.firstName}  ${item.lastName} </h3>
-                                                                                </div>
-                                                                                <div class="commentBlockContent" data-id="${item.id}" ">
-                                                                                    <p class="text-neutral text-lg font-medium">${item.comment} </p>
-                                                                                </div>
-                                                                                </div >
-                                                                                <div>
-                                                                                    <button data-id="${item.id}" onclick="ShowFormEdit(event,'${item.comment}')"  class='btnEdit btn btn-primary  ${item.userId === '@User?.FindFirstValue("Id")' ? '' : 'hidden'}'>Sửa</button>
-                                                                                    <button onclick="DeleteComment(${item.id})"  class='btn btn-error ${item.userId === '@User?.FindFirstValue("Id")' ? '' : 'hidden'}'>Xóa</button>
-                                                                                </div>
-                                                                            </div>
-                                                                        `)
-            })
-        }
 
 
         function DeleteComment(id) {
@@ -174,7 +167,7 @@
                 data: JSON.stringify({
                     pageIndex: index,
                     postId: @Model.Id
-                                }),
+                                        }),
                 success: function(response) {
                     renderComment(response?.data)
                 }
@@ -256,46 +249,7 @@
             })
         }
 
-        function ShowFormEdit(e, value) {
-            const clickedElement = e.target
-            const idComment = $(clickedElement).data("id")
-            $(clickedElement).attr('disabled', true)
-
-            $(".commentBlockContent").each(function() {
-                console.log($(this).data("id"))
-                if (idComment === $(this).data("id")) {
-                    $(this).empty()
-                    $(this).append(`
-                                                <div class="flex items-center gap-4">
-                                            <input id="commentContentEdit" value="${value}" type="text" class="w-full lg:w-[50%] input input-bordered" />
-                                            <div class="flex items-center gap-2">
-                                            <button  class="btn btn-primary" onclick="EditComment(${idComment})">
-                                                Cập Nhật
-                                            </button>
-                                            <button data-id="${idComment}" onclick="HiddenFormEdit(event,'${value}')"  class="btn btn-secondary">
-                                                X
-                                            </button>
-                                            </div>
-                                        </div>
-                                            `)
-                }
-            })
-        }
-
-        function HiddenFormEdit(e, value) {
-            const idComment = $(e.target).data("id")
-
-            $(".commentBlockContent").each(function() {
-                if (idComment === $(this).data("id")) {
-                    $(this).empty()
-                    $(this).append(`
-                                               <p class="text-neutral text-lg font-medium">${value} </p>
-                                            `)
-                }
-            })
-
-            $(".btnEdit").removeAttr('disabled')
-        }
+       
 
         function EditComment(idComment) {
             const comment = $("#commentContentEdit").val().trim()
@@ -328,8 +282,8 @@
                             if (idComment === $(this).data("id")) {
                                 $(this).empty()
                                 $(this).append(`
-                                               <p class="text-neutral text-lg font-medium">${comment} </p>
-                                            `)
+                                                       <p class="text-neutral text-lg font-medium">${comment} </p>
+                                                    `)
                             }
                         })
                         $(".btnEdit").removeAttr('disabled')
@@ -351,5 +305,83 @@
             })
         }
 
+
+        function renderComment(comments) {
+    $("#commentContainer").empty()
+    comments.map((item, index) => {
+        $("#commentContainer").append(`
+                                                                                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                                                                        <div class="flex-1">
+                                                                                        <div class="flex items-center gap-4 my-2">
+                                                                                            <div class="avatar">
+                                                                                                <div class="w-10 rounded-full">
+                                                                                                    <img src="/avatar/${item.avatar}" />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <h3 class="font-semibold text-md">${item.firstName}  ${item.lastName} </h3>
+                                                                                        </div>
+                                                                                        <div class="commentBlockContent" data-id="${item.id}" ">
+                                                                                            <p class="text-neutral text-lg font-medium">${item.comment} </p>
+                                                                                        </div>
+                                                                                        </div >
+                                                                                        <div>
+                                                                                            <button data-id="${item.id}" onclick="ShowFormEdit(event,'${item.comment}')"  class='btnEdit btn btn-primary  ${item.userId === '@User?.FindFirstValue("Id")' ? '' : 'hidden'}'>Sửa</button>
+                                                                                            <button onclick="DeleteComment(${item.id})"  class='btn btn-error ${item.userId === '@User?.FindFirstValue("Id")' ? '' : 'hidden'}'>Xóa</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                `)
+    })
+}
+
+function ShowFormEdit(e, value) {
+    const clickedElement = e.target
+    const idComment = $(clickedElement).data("id")
+    $(clickedElement).attr('disabled', true)
+
+    $(".commentBlockContent").each(function () {
+        console.log($(this).data("id"))
+        if (idComment === $(this).data("id")) {
+            $(this).empty()
+            $(this).append(`
+                                                        <div class="flex items-center gap-4">
+                                                    <input id="commentContentEdit" value="${value}" type="text" class="w-full lg:w-[50%] input input-bordered" />
+                                                    <div class="flex items-center gap-2">
+                                                    <button  class="btn btn-primary" onclick="EditComment(${idComment})">
+                                                        Cập Nhật
+                                                    </button>
+                                                    <button data-id="${idComment}" onclick="HiddenFormEdit(event,'${value}')"  class="btn btn-secondary">
+                                                        X
+                                                    </button>
+                                                    </div>
+                                                </div>
+                                                    `)
+        }
+    })
+}
+
+function HiddenFormEdit(e, value) {
+    const idComment = $(e.target).data("id")
+
+    $(".commentBlockContent").each(function () {
+        if (idComment === $(this).data("id")) {
+            $(this).empty()
+            $(this).append(`
+                                                       <p class="text-neutral text-lg font-medium">${value} </p>
+                                                    `)
+        }
+    })
+
+    $(".btnEdit").removeAttr('disabled')
+}
+
+
+function RenderPaging(response){
+            for (let i = 1; i <= response.totalPage; i++) {
+                        $("#BtnPaging").append(`
+                                    <button class="btnPaging btn ${i === 1 ? 'btn-active' : ''}" onclick="Pagination(${i},event)">${i}</button>
+                                `)
+                    }
+        }
     </script>
+
 }

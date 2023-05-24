@@ -1,16 +1,19 @@
-﻿using Blog.Application.Catalog.PostService;
+﻿using Blog.Application.Catalog.CategoryService;
+using Blog.Application.Catalog.PostService;
 using Blog.Application.Common.FileStorageService;
 using Blog.WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace Blog.WebApp.Controllers
 {
-    public class HomeController : Controller
+    [AllowAnonymous]
+    public class HomeController : BaseController
     {
 
         private readonly IPostService _postService;
-        public HomeController(IPostService postService)
+        public HomeController(ICategoryService categoryService,IPostService postService) : base(categoryService)
         {
             _postService = postService;
         }
@@ -19,6 +22,7 @@ namespace Blog.WebApp.Controllers
         public async Task<IActionResult> Index()
         {
             ViewData["ListLatestPort"] = await _postService.GetPostLatest();
+            ViewData["ListMostView"] = await _postService.GetPostMostView();
             return View();
         }
 

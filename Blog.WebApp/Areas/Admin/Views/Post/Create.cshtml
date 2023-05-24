@@ -4,6 +4,9 @@
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var ListCategories = ViewData["ListCategories"] as List<Blog.ViewModel.Catalog.Category.CategoryVm>;
+    var ListTags = ViewData["ListTags"] as List<Blog.ViewModel.Catalog.Tag.TagVm>;
 }
 
 <h1>Tạo Mới Bài Viết</h1>
@@ -30,7 +33,7 @@
     <div class="form-group">
         <label asp-for="CategoryId" class="control-label"><span class="text-danger">*  </span>Danh Mục</label>
         <select asp-for="CategoryId" id="categoryId" class="form-control">
-            @foreach (var item in ViewBag.listCategories)
+            @foreach (var item in ListCategories)
             {
                 <option value=@item.Id>
                     @item.Name
@@ -45,7 +48,7 @@
     </div>
     <div class="form-group">
         <label asp-for="Tags" class="control-label"><span class="text-danger">*  </span>Tags</label>
-        @foreach (var item in ViewBag.listTags)
+        @foreach (var item in ListTags)
         {
             <div class="form-check">
                 <input class="tag form-check-input" type="checkbox" value="@item.Id">

@@ -15,6 +15,7 @@ namespace Blog.Data.Configuration
         {
             builder.ToTable("Posts");
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).UseIdentityColumn();
             builder.Property(x => x.Title).IsRequired().HasMaxLength(255);
             builder.Property(x => x.Slug).IsRequired().HasMaxLength(255);
             builder.Property(x => x.Published).IsRequired().HasDefaultValue(false);

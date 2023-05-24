@@ -1,0 +1,108 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_Layout";
+    var listMostView = ViewData["ListMostView"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
+}
+
+<div class="w-[90%] mx-auto mt-[4rem]">
+    <div class="content flex space-x-[2rem]">
+        <div class="space-y-[2rem] flex-1">
+            <div class="space-y-[2rem]">
+                <h1 class="text-neutral font-semibold text-3xl">Kết Quả Tìm Kiếm</h1>
+                <hr class="my-[2rem]" />
+                <div id="ResultSearch" class="w-full">
+                    @*data render here*@
+                </div>
+            </div>
+            <div class="text-right">
+                <div id="BtnPaging" class="btn-group mt-[2rem] text-right">
+                </div>
+            </div>
+        </div>
+        @await Html.PartialAsync("_MostViewPost", listMostView)
+    </div>
+
+</div>
+
+
+@section Scripts{
+    <script>
+        $(document).ready(function() {
+            const currentPathName = new URL(window.location.href).pathname
+
+            // Host = localhost:port/thanh-vien/userName
+            let categorySlug = currentPathName.split("/")[3]
+
+            const params = new URLSearchParams(window.location.search)
+            const pageIndex = params.get("pageIndex")
+
+            if (pageIndex !== null) {
+                categorySlug = categorySlug.split("?")[0]
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("CategorySearch","Search")",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    pageIndex: pageIndex ? pageIndex : 1,
+                    Slug: categorySlug
+                }),
+                success: function(response) {
+                    RenderData(response)
+                    RenderPaging(response)
+                }
+            })
+        })
+
+
+        function RenderData(response) {
+            $("#ResultSearch").empty()
+            if (response?.data.length <= 0) {
+                $("#ResultSearch").html(`<h2 class="text-2xl text-center text-neutral">Không tìm thấy bài viết nào</h2>`)
+            }
+            response?.data.map((item, index) => {
+                $("#ResultSearch").append(`
+                                                   <div class="flex flex-col lg:flex-row gap-10">
+                                                    <a href="@Url.Action("Index","Blog")/${item.slug}">
+                                    <img src="/thumbnail/${item.thumbnail}" class="w-full max-w-[400] lg:min-w-[400px] rounded-sm h-[250px] hover:cursor-pointer hover:opacity-90 duration-300" />
+                                </a>
+                                                   <div class="flex flex-col h-[300px]">
+                                                    <a href="@Url.Action("Index","Blog")/${item.slug}" class="text-xl my-2 font-bold text-neutral">${item.title}</a>
+                                                    <h4 class="text-md my-2 font-medium text-base-300 ">${item.categoryName} / ${item.createdAt}</h4>
+                                                    <p class="text-lg my-2 font-medium text-base-content">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
+                                                </div>
+                                            </div>
+                                        `)
+            })
+        }
+
+        function RenderPaging(response) {
+            for (let i = 1; i <= response.totalPage; i++) {
+                $("#BtnPaging").append(`
+                                                            <button class="btnPaging btn ${i === 1 ? 'btn-active' : ''}" onclick="Pagination(${i},event)">${i}</button>
+                                                        `)
+            }
+        }
+
+        function Pagination(index) {
+
+            window.history.pushState(null, null, `?pageIndex=${index}`)
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("CategorySearch","Search")",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    pageIndex: index,
+                    Slug: categorySlug
+                }),
+                success: function(response) {
+                    RenderData(response)
+                }
+            })
+        }
+    </script>
+}

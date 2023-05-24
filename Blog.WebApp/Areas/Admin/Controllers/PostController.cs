@@ -70,8 +70,8 @@ namespace Blog.WebApp.Areas.Admin.Controllers
             var listTags = await _tagService.GetListTags();
             var listCategories = await _categoryService.GetListCategories();
 
-            ViewBag.ListTags = listTags;
-            ViewBag.ListCategories = listCategories;
+            ViewData["ListTags"] = listTags;
+            ViewData["ListCategories"] = listCategories;
 
             var viewPost = new UpdatePostModel()
             {
@@ -94,8 +94,8 @@ namespace Blog.WebApp.Areas.Admin.Controllers
             var listTags = await _tagService.GetListTags();
             var listCategories = await _categoryService.GetListCategories();
 
-            ViewBag.ListTags = listTags;
-            ViewBag.ListCategories = listCategories;
+            ViewData["ListTags"] = listTags;
+            ViewData["ListCategories"] = listCategories;
             return View();
         }
     }

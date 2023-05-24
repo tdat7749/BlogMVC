@@ -15,7 +15,7 @@ namespace Blog.Data.Configuration
         {
             builder.ToTable("PostInTags");
             builder.HasKey(x => x.Id);
-
+            builder.Property(x => x.Id).UseIdentityColumn();
 
             builder.HasOne(x => x.Post).WithMany(x => x.PostInTags).HasForeignKey(x => x.PostId);
             builder.HasOne(x => x.Tag).WithMany(x => x.PostInTags).HasForeignKey(x => x.TagId);

@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Blog.Application.System.AuthenService
 {
@@ -17,12 +19,14 @@ namespace Blog.Application.System.AuthenService
         private readonly BlogDbContext _context;
         private readonly UserManager<UserApplication> _userManager;
         private readonly SignInManager<UserApplication> _signInManager;
+        private readonly IEmailSender _emailSender;
 
-        public AuthenService(BlogDbContext context, UserManager<UserApplication> userManage, SignInManager<UserApplication> signInManager)
+        public AuthenService(BlogDbContext context, UserManager<UserApplication> userManage, SignInManager<UserApplication> signInManager,IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManage;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         public async Task<JsonResponse> Login(LoginModel model)
@@ -139,7 +143,8 @@ namespace Blog.Application.System.AuthenService
                 FirstName = model.FirstName,
                 LastName = model.Lastname,
                 Email = model.Email,
-                Avatar = "abc.jpg"
+                Avatar = "abc.jpg",
+                PhoneNumber = model.PhoneNumber,
             };
 
             var user = await _userManager.CreateAsync(newUser,model.Password);
@@ -152,9 +157,11 @@ namespace Blog.Application.System.AuthenService
                 };
             }
 
+            await _emailSender.SendEmailAsync(model.Email, "Đăng Ký Thành Công", "Hệ thống sẽ coi đây là email chính thức của bạn, khi lấy lại mật khẩu thì hệ thống sẽ gửi về địa chỉ Email này!");
+
             return new JsonResponse()
             {
-                Message = "Đăng ký thành công",
+                Message = "Đăng ký thành công, một tin nhắn đã được gửi tới Email của bạn",
                 Success = true
             };
         }

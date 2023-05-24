@@ -4,6 +4,7 @@
     ViewData["Title"] = "Role";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 
+    var listUserRoles = ViewData["ListUserRoles"] as List<string>;
 }
 
 <h1>Đăng Ký Quyền Cho Người Dùng</h1>
@@ -16,7 +17,7 @@
     @foreach (var item in @Model)
     {
         <div class="form-check">
-            <input class="role form-check-input" type="checkbox" value="@item.Role" @(ViewBag.ListCurrentRoles.Contains(item.Role) ? "checked" : "")>
+            <input class="role form-check-input" type="checkbox" value="@item.Role" @(listUserRoles.Contains(item.Role) ? "checked" : "")>
             <label class="form-check-label" asp-for="@item.Role">
                 @item.Role
             </label>

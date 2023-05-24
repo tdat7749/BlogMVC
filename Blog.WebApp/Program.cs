@@ -4,6 +4,7 @@ using Blog.Application.Catalog.TagService;
 using Blog.Application.Common.FileStorageService;
 using Blog.Application.System.AuthenService;
 using Blog.Application.System.CommentService;
+using Blog.Application.System.MailService;
 using Blog.Application.System.RoleService;
 using Blog.Application.System.UserService;
 using Blog.Data.EF;
@@ -12,6 +13,7 @@ using Blog.ViewModel.Custom;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,8 +24,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BlogDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("BlogDb"));
-});
+    
+},ServiceLifetime.Transient);
 
+//Đăng ký dịch vụ send mail
+var mailSettings = builder.Configuration.GetSection("MailSettings");
+builder.Services.Configure<MailSettings>(mailSettings);
+
+
+//DI
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -32,6 +41,8 @@ builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+
+builder.Services.AddTransient<IEmailSender, MailService>();
 
 
 
@@ -83,6 +94,9 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -123,6 +137,11 @@ app.UseEndpoints(endpoint =>
     endpoint.MapControllerRoute(
         name: "Author",
         pattern: "{controller=Author}/{action=Index}/{username}"
+    );
+
+    endpoint.MapControllerRoute(
+        name: "Search",
+        pattern: "{controller=Search}/{action}/{slug}"
     );
 
     endpoint.MapControllerRoute(

@@ -183,7 +183,7 @@
                                     title: response.message,
                                     icon: 'success',
                                 }).then(result => {
-                                    window.location = "@Url.Action("Index","User")"
+                                    window.location = "@Url.Action("Index","User",new {Area = "Admin})"
                                 })
 
                             } else {

@@ -34,6 +34,7 @@
 
 @section Scripts{
     <script src="~/ckeditor/ckeditor.js"></script>
+    <script src=~/js/utilities.js></script>
     <script>
 
         $(document).ready(function() {
@@ -138,7 +139,7 @@
                     <td>${item.categoryName}</td>
                     <td>${item.createdAt}</td>
                     <td>
-                        <button class="btn btn-ghost btn-xs">Chi Tiết</button>
+                        <a href="@Url.Action("Index","Blog")/${item.slug}" class="btn btn-ghost btn-xs">Chi Tiết</a>
                     </td>
                 </tr>
                 `)
@@ -315,6 +316,24 @@
                             icon: "error"
                         })
                         return;
+                    }
+
+                    if(!isValidEmail(email)){
+                        swal.fire({
+                            title:"Lỗi",
+                            text:"Email không đúng định dạng",
+                            icon:"error"
+                        })
+                        return
+                    }
+
+                    if (!isValidPhoneNumber(phoneNumber)) {
+                        swal.fire({
+                            title:"Lỗi",
+                            text:"Số điện thoại không đúng định dạng của Việt Nam",
+                            icon:"error"
+                        })
+                        return
                     }
 
                     const body = {

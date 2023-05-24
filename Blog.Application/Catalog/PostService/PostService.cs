@@ -484,7 +484,8 @@ namespace Blog.Application.Catalog.PostService
                 Slug = x.p.Slug,
                 CreatedAt = x.p.CreatedAt.ToString(),
                 FirstName = x.u.FirstName,
-                LastName = x.u.LastName
+                LastName = x.u.LastName,
+                Published = x.p.Published
             }).ToListAsync();
 
             return new PagingResponse<List<PostListVm>>()
@@ -520,6 +521,120 @@ namespace Blog.Application.Catalog.PostService
             }).ToListAsync();
 
             return result;
+        }
+
+        public async Task<PagingResponse<List<PostListVm>>> GetPostByTag(PagingSearchRequest request)
+        {
+            int TotalPage, TotalRecord;
+            var query = from p in _context.Posts
+                        join c in _context.Categories on p.CategoryId equals c.Id
+                        join pt in _context.PostInTags on p.Id equals pt.PostId
+                        join t in _context.Tags on pt.TagId equals t.Id
+                        where t.Slug.ToLower() == request.Slug.ToLower() && p.Published == true && c.Status == Status.Enable && t.Status == Status.Enable
+                        select new { p, c };
+
+
+            TotalRecord = query.Count();
+
+            query = query.OrderByDescending(x => x.p.CreatedAt).Skip(request.PageSize * (request.PageIndex - 1)).Take(request.PageSize);
+
+
+            TotalPage = (int)Math.Ceiling((double)TotalRecord / request.PageSize);
+
+            var result = await query.Select(x => new PostListVm()
+            {
+                Id = x.p.Id,
+                Title = x.p.Title,
+                Body = x.p.Body,
+                View = x.p.View,
+                Thumbnail = x.p.Thumbnail,
+                CategoryName = x.c.Name,
+                Slug = x.p.Slug,
+                CreatedAt = x.p.CreatedAt.ToString()
+            }).Distinct().ToListAsync();
+
+            return new PagingResponse<List<PostListVm>>()
+            {
+                Data = result,
+                TotalPage = TotalPage,
+                TotalRecord = TotalRecord
+            };
+        }
+
+        public async Task<PagingResponse<List<PostListVm>>> GetPostByCategory(PagingSearchRequest request)
+        {
+            int TotalPage, TotalRecord;
+            var query = from p in _context.Posts
+                        join c in _context.Categories on p.CategoryId equals c.Id
+                        join pt in _context.PostInTags on p.Id equals pt.PostId
+                        join t in _context.Tags on pt.TagId equals t.Id
+                        where c.Slug.ToLower() == request.Slug.ToLower() && p.Published == true && c.Status == Status.Enable && t.Status == Status.Enable
+                        select new { p, c };
+
+
+            TotalRecord = query.Count();
+
+            query = query.OrderByDescending(x => x.p.CreatedAt).Skip(request.PageSize * (request.PageIndex - 1)).Take(request.PageSize);
+
+
+            TotalPage = (int)Math.Ceiling((double)TotalRecord / request.PageSize);
+
+            var result = await query.Select(x => new PostListVm()
+            {
+                Id = x.p.Id,
+                Title = x.p.Title,
+                Body = x.p.Body,
+                View = x.p.View,
+                Thumbnail = x.p.Thumbnail,
+                CategoryName = x.c.Name,
+                Slug = x.p.Slug,
+                CreatedAt = x.p.CreatedAt.ToString()
+            }).Distinct().ToListAsync();
+
+            return new PagingResponse<List<PostListVm>>()
+            {
+                Data = result,
+                TotalPage = TotalPage,
+                TotalRecord = TotalRecord
+            };
+        }
+
+        public async Task<PagingResponse<List<PostListVm>>> GetPostByKeyword(PagingSearchRequest request)
+        {
+            int TotalPage, TotalRecord;
+            var query = from p in _context.Posts
+                        join c in _context.Categories on p.CategoryId equals c.Id
+                        join pt in _context.PostInTags on p.Id equals pt.PostId
+                        join t in _context.Tags on pt.TagId equals t.Id
+                        where p.Title.ToLower().Contains(request.Slug.ToLower()) && p.Published == true && c.Status == Status.Enable && t.Status == Status.Enable
+                        select new { p, c };
+
+
+            TotalRecord = query.Count();
+
+            query = query.OrderByDescending(x => x.p.CreatedAt).Skip(request.PageSize * (request.PageIndex - 1)).Take(request.PageSize);
+
+
+            TotalPage = (int)Math.Ceiling((double)TotalRecord / request.PageSize);
+
+            var result = await query.Select(x => new PostListVm()
+            {
+                Id = x.p.Id,
+                Title = x.p.Title,
+                Body = x.p.Body,
+                View = x.p.View,
+                Thumbnail = x.p.Thumbnail,
+                CategoryName = x.c.Name,
+                Slug = x.p.Slug,
+                CreatedAt = x.p.CreatedAt.ToString()
+            }).Distinct().ToListAsync();
+
+            return new PagingResponse<List<PostListVm>>()
+            {
+                Data = result,
+                TotalPage = TotalPage,
+                TotalRecord = TotalRecord
+            };
         }
     }
 }

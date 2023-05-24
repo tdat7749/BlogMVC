@@ -5,19 +5,21 @@ using Blog.Application.System.UserService;
 using Blog.ViewModel.Catalog.Post;
 using Blog.ViewModel.Common;
 using Blog.ViewModel.System.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Blog.WebApp.Controllers
 {
     [Route("tai-khoan")]
-    public class UserController : Controller
+    [Authorize]
+    public class UserController : BaseController
     {
         private readonly IUserService _userService;
         private readonly IPostService _postService;
         private readonly ICategoryService _categoryService;
         private readonly ITagService _tagService;
-        public UserController(IUserService userService,IPostService postService,ICategoryService categoryService,ITagService tagService)
+        public UserController(IUserService userService,IPostService postService,ICategoryService categoryService,ITagService tagService) : base(categoryService)
         {
             _userService = userService;
             _postService = postService;
@@ -25,6 +27,7 @@ namespace Blog.WebApp.Controllers
             _tagService = tagService;
         }
 
+        [AllowAnonymous]
         [Route("")]        
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -34,6 +37,7 @@ namespace Blog.WebApp.Controllers
             return View(result);
         }
 
+        [AllowAnonymous]
         [Route("thong-tin-ca-nhan")]
         [HttpGet]
         public async Task<IActionResult> Information()
@@ -43,6 +47,7 @@ namespace Blog.WebApp.Controllers
             return PartialView("_Information",result);
         }
 
+        [AllowAnonymous]
         [Route("doi-mat-khau")]
         [HttpGet]
         public IActionResult ChangePassword()
@@ -50,6 +55,7 @@ namespace Blog.WebApp.Controllers
             return PartialView("_ChangePassword");
         }
 
+        [AllowAnonymous]
         [Route("tat-ca-bai-viet")]
         [HttpGet]
         public IActionResult AllPosts()
@@ -57,6 +63,7 @@ namespace Blog.WebApp.Controllers
             return PartialView("_AllPosts");
         }
 
+        [Authorize(Roles = "Tác Giả, Quản Trị Viên")]
         [Route("tao-bai-viet")]
         [HttpGet]
         public async Task<IActionResult> CreatePost()
@@ -69,6 +76,7 @@ namespace Blog.WebApp.Controllers
             return PartialView("_CreatePost");
         }
 
+        [AllowAnonymous]
         [Route("thay-hinh-dai-dien")]
         [HttpPatch]
         public async Task<IActionResult> ChangeAvatar([FromForm] ChangeUserAvatarModel model)
@@ -77,6 +85,7 @@ namespace Blog.WebApp.Controllers
             return new JsonResult(result);
         }
 
+        [AllowAnonymous]
         [HttpPut]
         public async Task<IActionResult> Edit([FromBody] UpdateUserModel model)
         {
@@ -84,6 +93,7 @@ namespace Blog.WebApp.Controllers
             return new JsonResult(result);
         }
 
+        [AllowAnonymous]
         [Route("doi-mat-khau")]
         [HttpPatch]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
@@ -92,6 +102,7 @@ namespace Blog.WebApp.Controllers
             return new JsonResult(result);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AllPost([FromBody] PagingRequest request)
         {
@@ -100,6 +111,7 @@ namespace Blog.WebApp.Controllers
             return new JsonResult(result);
         }
 
+        [Authorize(Roles ="Tác Giả, Quản Trị Viên")]
         [Route("create-post")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreatePostModel model)

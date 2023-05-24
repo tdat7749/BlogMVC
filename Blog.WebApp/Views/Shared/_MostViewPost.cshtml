@@ -1,0 +1,26 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<Blog.ViewModel.Catalog.Post.PostListVm>
+@{
+    Layout = null;
+    
+}
+
+<div class="hidden lg:block flex-none w-[400px]">
+    <h1 class="text-neutral font-semibold text-3xl">Nhiều Người Xem</h1>
+    <hr class="my-[2rem]" />
+    <div class="space-y-[2rem]" >
+        @foreach(var item in @Model)
+        {
+            <div class="flex space-x-[1rem]">
+            <a asp-controller="Blog" asp-action="Index" asp-route-slug="@item.Slug"><img src="/thumbnail/@item.Thumbnail" class="max-w-[200px] h-[120px] rounded-sm min-w-[200px] hover:opacity-90 " /></a>
+            <div class="space-y-[5px]">
+                <a asp-controller="Blog" asp-action="Index" asp-route-slug="@item.Slug"><h1 class="text-neutral  font-bold w-[10rem] truncate ...">@item.Title</h1></a>
+                <h1 class="text-neutral font-medium  text-md">@item.CategoryName</h1>
+                <p class="text-neutral font-medium  text-sm">@item.CreatedAt</p>
+            </div>
+        </div>
+        }
+    </div>
+</div>

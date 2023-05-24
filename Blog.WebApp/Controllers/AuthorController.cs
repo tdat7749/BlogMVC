@@ -1,4 +1,5 @@
-﻿using Blog.Application.Catalog.PostService;
+﻿using Blog.Application.Catalog.CategoryService;
+using Blog.Application.Catalog.PostService;
 using Blog.Application.System.UserService;
 using Blog.ViewModel.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -6,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Blog.WebApp.Controllers
 {
     [Route("thanh-vien")]
-    public class AuthorController : Controller
+    public class AuthorController : BaseController
     {
         private readonly IUserService _userService;
         private readonly IPostService _postService;
-        public AuthorController(IUserService userService, IPostService postService)
+        public AuthorController(ICategoryService categoryService,IUserService userService, IPostService postService) : base(categoryService)
         {
             _userService = userService;
             _postService = postService;

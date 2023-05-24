@@ -145,8 +145,8 @@
                                                                                         ${item.phoneNumber}
                                                                                     </td>
                                                                                     <td>
-                                                                                    <a class="btn btn-info" href="@Url.Action("Edit","User")/${item.id}">Chi Tiết</a>
-                                                                                    <a class="btn btn-warning" href="@Url.Action("Role","User")/${item.id}">Quyền</a>
+                                                                                    <a class="btn btn-info" href="@Url.Action("Edit","User",new {Area = "Admin"})/${item.id}">Chi Tiết</a>
+                                                                                    <a class="btn btn-warning" href="@Url.Action("Role","User",new {Area = "Admin"})/${item.id}">Quyền</a>
                                                                                     </td>
                                                                                 </tr>
                                                                                                 `)

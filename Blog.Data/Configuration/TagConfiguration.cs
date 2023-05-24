@@ -15,6 +15,7 @@ namespace Blog.Data.Configuration
         {
             builder.ToTable("Tags");
             builder.HasKey(t => t.Id);
+            builder.Property(x => x.Id).UseIdentityColumn();
             builder.Property(x => x.Name).IsRequired().HasMaxLength(255);
             builder.Property(x => x.Slug).IsRequired().HasMaxLength(255);
             builder.Property(x => x.CreatedAt).HasDefaultValue(DateTime.UtcNow);

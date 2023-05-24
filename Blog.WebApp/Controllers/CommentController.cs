@@ -1,10 +1,12 @@
 ﻿using Blog.Application.System.CommentService;
 using Blog.ViewModel.Common;
 using Blog.ViewModel.System.Comment;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.WebApp.Controllers
 {
+    [AllowAnonymous]
     public class CommentController : Controller
     {
         private readonly ICommentService _commentService;

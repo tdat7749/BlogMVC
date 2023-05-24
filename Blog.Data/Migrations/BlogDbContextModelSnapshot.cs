@@ -22,6 +22,39 @@ namespace Blog.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("Blog.Data.Entities.Carousel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Carousels", (string)null);
+                });
+
             modelBuilder.Entity("Blog.Data.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -33,7 +66,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 425, DateTimeKind.Utc).AddTicks(8296));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 713, DateTimeKind.Utc).AddTicks(8986));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -53,7 +86,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 425, DateTimeKind.Utc).AddTicks(8415));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 713, DateTimeKind.Utc).AddTicks(9160));
 
                     b.HasKey("Id");
 
@@ -75,7 +108,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 425, DateTimeKind.Utc).AddTicks(8949));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 714, DateTimeKind.Utc).AddTicks(86));
 
                     b.Property<int>("PostId")
                         .HasColumnType("int");
@@ -83,7 +116,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 425, DateTimeKind.Utc).AddTicks(9115));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 714, DateTimeKind.Utc).AddTicks(291));
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -115,7 +148,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 425, DateTimeKind.Utc).AddTicks(5268));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 713, DateTimeKind.Utc).AddTicks(5110));
 
                     b.Property<bool>("Published")
                         .ValueGeneratedOnAdd()
@@ -138,7 +171,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 425, DateTimeKind.Utc).AddTicks(5430));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 713, DateTimeKind.Utc).AddTicks(5289));
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -191,7 +224,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 426, DateTimeKind.Utc).AddTicks(3099));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 714, DateTimeKind.Utc).AddTicks(6159));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -209,7 +242,7 @@ namespace Blog.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2023, 5, 10, 19, 8, 42, 426, DateTimeKind.Utc).AddTicks(3251));
+                        .HasDefaultValue(new DateTime(2023, 5, 24, 6, 29, 32, 714, DateTimeKind.Utc).AddTicks(6343));
 
                     b.HasKey("Id");
 

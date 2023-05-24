@@ -33,5 +33,10 @@ namespace Blog.Application.Catalog.PostService
         Task<List<PostListVm>> GetPostMostView();
         void PlusViewPost(int id);
 
+        Task<PagingResponse<List<PostListVm>>> GetPostByTag(PagingSearchRequest request);
+        Task<PagingResponse<List<PostListVm>>> GetPostByCategory(PagingSearchRequest request);
+        Task<PagingResponse<List<PostListVm>>> GetPostByKeyword(PagingSearchRequest request);
+
+
     }
 }

@@ -15,6 +15,7 @@ namespace Blog.Data.Configuration
         {
             builder.ToTable("Comments");
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).UseIdentityColumn();
             builder.Property(x => x.Content).IsRequired();
             builder.Property(x => x.CreatedAt).HasDefaultValue(DateTime.UtcNow);
             builder.Property(x => x.UpdatedAt).HasDefaultValue(DateTime.UtcNow);
