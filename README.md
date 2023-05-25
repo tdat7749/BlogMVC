@@ -6,15 +6,17 @@ UI: Bootstrap, Tailwind CSS
 
 
 Main features :
-<h1>ADMIN</h1>:
+<h1>ADMIN</h1>
+
 - Tag Management (CRUD, status)
 - Category Management (CRUD, status)
 - Post Management (CRUD, status)
 - Carousel Management (CRUD, status)
 - User Management (role-based authorization)
 
-<h1>USER</h1>:
-- Create a post
+<h1>USER</h1>
+
+- Create a post (when the user has the "author" role)
 - Log in
 - Log out
 - Register
