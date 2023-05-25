@@ -1,0 +1,326 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Danh Sách Bài Viết</h1>
+
+<hr/>
+
+<p class="text-right">
+    <a asp-action="Create" asp-controller="Post" class="btn btn-primary">Tạo Mới</a>
+</p>
+
+<div class="text-right mt-8 d-flex align-items-center justify-content-end mb-4">
+    <input id="searchKeyword" type="text" class="form-control w-25" />
+    <button onclick="SearchKeyWord()" class="btn btn-primary w-10 ml-2">Tìm Kiếm</button>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Hình Ảnh
+                </th>
+                <th>
+                    Tên
+                </th>
+                <th>
+                    Thứ Tự
+                </th>
+                <th>
+                    Trạng Thái
+                </th>
+                <th>
+                    Thao Tác
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @*@foreach (var item in Model.Data) {
+            <tr>
+            <td>
+            @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Slug)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+            </tr>
+            }*@
+        </tbody>
+    </table>
+    <div id="error-table" class="text-center">
+
+    </div>
+</div>
+<nav aria-label="Page navigation example">
+    <ul class="pagination" id="paginationID">
+        @*        <li class="page-item">
+        <a class="page-link" href="#" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+        </a>
+        </li>
+        @for (var i = 1; i <= Model.TotalPage; i++)
+        {
+        <li class="page-item"><a class="page-link" href="#">@i</a></li>
+        }
+        <li class="page-item">
+        <a class="page-link" href="#" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+        </a>
+        </li>*@
+    </ul>
+</nav>
+
+        @section AdminScripts{
+    <script>
+         $(document).ready(function() {
+            const params = new URLSearchParams(window.location.search)
+            const pageIndex = params.get("pageIndex")
+            const pageSize = params.get("pageSize")
+            const keyword = params.get("keyword")
+            $.ajax({
+                url: "@Url.Action("GetAllCarousel","Carousel",new {Area = "Admin"})",
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    PageIndex: pageIndex ? pageIndex : 1,
+                    PageSize: pageSize ? pageSize : 3,
+                    Keyword: keyword ? keyword : ""
+                }),
+                success: function(response) {
+                    renderData(response)
+                }
+            })
+        })
+
+
+        function renderData(response) {
+            $("#tableBody").empty()
+            $("#paginationID").empty()
+            $("#error-table").empty()
+
+            var totalPages = response.totalPage
+            const params = new URLSearchParams(window.location.search)
+            const pageIndex = params.get("pageIndex") ? params.get("pageIndex") : 1
+            if(response?.data.length <= 0){
+                $("#error-table").append(`
+                <p class="text-danger text-lg">Không tồn tại carousel nào</p>
+                
+                `)
+            }
+            response.data.map((item, index) => {
+                $("#tableBody").append(`
+                                                                                                 <tr>
+                                                                                    <td>
+                                                                                        ${item.id}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <img src="/thumbnail/${item.url}" style="width:200px" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        ${item.name}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        ${item.sortOrder}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                    <a data-status="${item.status === 1 ? 0 : 1}" data-id="${item.id}" onclick="changeStatus()" class="btnStatus btn ${item.status === 1 ? "btn-success" : "btn-dark"}" href="javascript:void(0)">${item.status === 1 ? "Hoạt Động" : "Ngừng Hoạt Động"}</a>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                    <a class="btn btn-primary" href="@Url.Action("Edit","Carousel")/${item.id}">Sửa</a>
+                                                                                    <a class="btn btn-danger" onclick="DeleteCarousel(${item.id})" href="javascript:void(0)">Xóa</a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                                `)
+            })
+
+
+            // Paginantion
+            $("#paginationID").append(`
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" href="#" aria-label="Previous">
+                                                                            <span aria-hidden="true">&laquo;</span>
+                                                                            <span class="sr-only">Previous</span>
+                                                                        </a>
+                                                                    </li>`)
+
+            for (let i = 1; i <= response.totalPage; i++) {
+                $("#paginationID").append(`<li class="page-item ${i === Number(pageIndex) ? 'active' : ''}"><a onclick="Paginantion(${i})" href="javascript:void(0)" class="page-link">${i}</a></li>`)
+            }
+
+
+            $("#paginationID").append(`
+                                                                    <li class="page-item">
+                                                                        <a class="page-link" href="#" aria-label="Next">
+                                                                            <span aria-hidden="true">&raquo;</span>
+                                                                            <span class="sr-only">Next</span>
+                                                                        </a>
+                                                                    </li>`)
+
+        }
+
+
+        
+        function Paginantion(index) {
+            const currentUrl = new URL(window.location.href);
+            const urlParams = new URLSearchParams(window.location.search)
+            if (currentUrl.search !== "") {
+                urlParams.set('pageIndex', index);
+                currentUrl.search = urlParams.toString()
+                window.history.pushState({}, '', currentUrl)
+            } else {
+                window.history.pushState(null, null, `?pageIndex=${index}`)
+            }
+
+            const keyword = urlParams.get('keyword')
+            const pageSize = urlParams.get('pageSize')
+
+            $.ajax({
+                url: "@Url.Action("GetAllCarousel","Carousel",new {Area = "Admin"})",
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    PageIndex: index,
+                    PageSize: pageSize ? pageSize : 3,
+                    Keyword: keyword ? keyword : ''
+                }),
+                success: function(response) {
+                    renderData(response)
+                }
+            })
+        }
+
+        function changeStatus() {
+            $(".btnStatus").click(function(e) {
+                const btn = $(this)
+                const statusCode = parseInt(btn.attr("data-status"))
+                const id = parseInt(btn.attr("data-id"))
+                const body = {
+                    status: statusCode,
+                    id: id
+                }
+
+                Swal.fire({
+                    title: "Thay Đổi Trạng Thái",
+                    text:'Bạn chắc chắn thay đổi trạng thái ?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Chắc chắn',
+                    cancelButtonText: 'Không',
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        console.log(body)
+                        $.ajax({
+                            type: "PATCH",
+                            url: "@Url.Action("UpdateCarouselStatus","Carousel",new {Area = "Admin"})",
+                            contentType: "application/json",
+                            data: JSON.stringify(body),
+                            success: function(response) {
+                                if (response.success === true) {
+                                    Swal.fire({
+                                        title: response.message,
+                                        icon: 'success'
+                                    })
+                                    if (statusCode === 1) {
+                                        btn.text("Hoạt Động")
+                                        btn.removeClass("btn-dark")
+                                        btn.addClass("btn-success")
+                                        btn.attr('data-status', 0)
+                                    }
+
+                                    if (statusCode === 0) {
+                                        btn.text("Ngừng Hoạt Động")
+                                        btn.removeClass("btn-success")
+                                        btn.addClass("btn-dark")
+                                        btn.attr('data-status', 1)
+                                    }
+                                } else {
+                                    Swal.fire({
+                                        title: response.message,
+                                        icon: 'error'
+                                    })
+                                }
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                console.log("Lỗi " + textStatus + ": " + errorThrown);
+                                console.log(jqXHR);
+                            }
+                        })
+                    }
+                })
+            })
+        }
+
+        function DeleteCarousel(id) {
+            Swal.fire({
+                title: "Xóa Bài Viết",
+                text: "Bạn có muốn xóa carousel này ?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: "Xóa",
+                cancelButtonText: "Không"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "@Url.Action("DeleteCarousel","Carousel",new {Area = "Admin"})",
+                        type: "DELETE",
+                        contentType: 'application/json',
+                        data: JSON.stringify(id),
+                        success: function(response) {
+                            if (response.success === true) {
+                                Swal.fire({
+                                    title: response.message,
+                                    icon: 'success'
+                                })
+                                Paginantion(1)
+
+                            } else {
+                                Swal.fire({
+                                    title: response.message,
+                                    icon: 'error'
+                                })
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            Swal.fire({
+                                title: "Có lỗi",
+                                icon: 'error'
+                            })
+                        }
+                    })
+                }
+            })
+        }
+
+
+        function SearchKeyWord() {
+            const keyword = $("#searchKeyword").val()
+            window.history.pushState(null, null, `?keyword=${keyword}`)
+
+            Paginantion(1)
+
+        }
+    </script>
+}

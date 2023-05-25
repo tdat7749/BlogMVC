@@ -5,14 +5,14 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 
     var listUserRoles = ViewData["ListUserRoles"] as List<string>;
+    string id = ViewData["CurrentId"] as string;
 }
 
 <h1>Đăng Ký Quyền Cho Người Dùng</h1>
 
 <hr />
 
-<hr />
-<input value="ViewBag.CurrentId" hidden id="id" />
+<input value="@id" hidden id="id" />
 <div class="d-flex flex-column" style="gap:2rem">
     @foreach (var item in @Model)
     {

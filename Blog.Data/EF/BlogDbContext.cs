@@ -32,11 +32,11 @@ namespace Blog.Data.EF
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Category> Categories { get; }
-        public DbSet<Comment> Comments { get; }
-        public DbSet<Post> Posts { get; }
-        public DbSet<PostInTag> PostInTags {get; }
-        public DbSet<Tag> Tags { get; }
-        public DbSet<Carousel> Carousels { get; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostInTag> PostInTags {get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<Carousel> Carousels { get; set; }
     }
 }

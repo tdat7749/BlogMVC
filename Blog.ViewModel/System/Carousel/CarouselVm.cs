@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blog.Data.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Blog.ViewModel.System.Carousel
         public string Name { get; set; }
         public string Url { get; set; }
         public int SortOrder { get; set; }
-        public string Status { get; set; }
+        public Status Status { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -61,7 +61,7 @@ namespace Blog.WebApp.Areas.Admin.Controllers
         public async Task<IActionResult> Role(string id)
         {
             ViewData["ListUserRoles"] = await _roleService.GetListRolesUser(id);
-            ViewBag.CurrentId = id;
+            ViewData["CurrentId"] = id;
             var listRole = await _roleService.GetListRoles();
 
 

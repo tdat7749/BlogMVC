@@ -3,6 +3,7 @@ using Blog.Application.Catalog.PostService;
 using Blog.Application.Catalog.TagService;
 using Blog.Application.Common.FileStorageService;
 using Blog.Application.System.AuthenService;
+using Blog.Application.System.CarouselService;
 using Blog.Application.System.CommentService;
 using Blog.Application.System.MailService;
 using Blog.Application.System.RoleService;
@@ -41,8 +42,9 @@ builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ICarouselService, CarouselService>();
 
-builder.Services.AddTransient<IEmailSender, MailService>();
+builder.Services.AddSingleton<IEmailSender, MailService>();
 
 
 

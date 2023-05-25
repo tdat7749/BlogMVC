@@ -13,6 +13,7 @@ namespace Blog.Application.System.AuthenService
         Task<JsonResponse> Register(RegisterModel model);
         Task<JsonResponse> Login(LoginModel model);
 
+        Task<JsonResponse> ForgotPassword(string email);
         Task<JsonResponse> Logout();
     }
 }

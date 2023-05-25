@@ -1,6 +1,7 @@
 ﻿using Blog.Application.Catalog.CategoryService;
 using Blog.Application.Catalog.PostService;
 using Blog.Application.Common.FileStorageService;
+using Blog.Application.System.CarouselService;
 using Blog.WebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,16 +14,19 @@ namespace Blog.WebApp.Controllers
     {
 
         private readonly IPostService _postService;
-        public HomeController(ICategoryService categoryService,IPostService postService) : base(categoryService)
+        private readonly ICarouselService _carouselService;
+        public HomeController(ICategoryService categoryService,IPostService postService,ICarouselService carouselService) : base(categoryService)
         {
             _postService = postService;
+            _carouselService = carouselService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            ViewData["ListLatestPort"] = await _postService.GetPostLatest();
+            ViewData["ListLatestPost"] = await _postService.GetPostLatest();
             ViewData["ListMostView"] = await _postService.GetPostMostView();
+            ViewData["ListCarousel"] = await _carouselService.GetPublicCarousel();
             return View();
         }
 

@@ -241,25 +241,34 @@ namespace Blog.Application.Catalog.PostService
 
         public async Task<List<PostListVm>> GetPostLatest()
         {
-            var query = (from p in _context.Posts
-                         join c in _context.Categories on p.CategoryId equals c.Id
-                         join pt in _context.PostInTags on p.Id equals pt.PostId
-                         join t in _context.Tags on pt.TagId equals t.Id
-                         where p.Published == true && c.Status == Status.Enable && t.Status == Status.Enable
-                         select new { p, c}).Distinct().OrderByDescending(x => x.p.CreatedAt).Take(10);
-
-            return await query.Select(x => new PostListVm()
+            try
             {
-                Id = x.p.Id,
-                Slug = x.p.Slug,
-                Body = x.p.Body,
-                CreatedAt = x.p.CreatedAt.ToString(),
-                View = x.p.View,
-                Thumbnail = x.p.Thumbnail,
-                CategoryName = x.c.Name,
-                Title = x.p.Title,
-                Published = x.p.Published
-            }).ToListAsync();
+                var query = (from p in _context.Posts
+                             join c in _context.Categories on p.CategoryId equals c.Id
+                             join pt in _context.PostInTags on p.Id equals pt.PostId
+                             join t in _context.Tags on pt.TagId equals t.Id
+                             where p.Published == true && c.Status == Status.Enable && t.Status == Status.Enable
+                             select new { p, c }).Distinct().OrderByDescending(x => x.p.CreatedAt).Take(10);
+
+
+
+                return await query.Select(x => new PostListVm()
+                {
+                    Id = x.p.Id,
+                    Slug = x.p.Slug,
+                    Body = x.p.Body,
+                    CreatedAt = x.p.CreatedAt.ToString(),
+                    View = x.p.View,
+                    Thumbnail = x.p.Thumbnail,
+                    CategoryName = x.c.Name,
+                    Title = x.p.Title,
+                    Published = x.p.Published
+                }).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
 
         public async Task<PagingResponse<List<PostListVm>>> GetPublicAllPost(PagingRequest request)

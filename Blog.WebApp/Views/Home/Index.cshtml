@@ -1,83 +1,74 @@
-﻿@model Blog.ViewModel.Catalog.Tag.abc
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
 
-    var listLatestPost = ViewData["ListLatestPort"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
+    var listLatestPost = ViewData["ListLatestPost"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
     var listMostView = ViewData["ListMostView"] as List<Blog.ViewModel.Catalog.Post.PostListVm>;
+    var listCarousel = ViewData["ListCarousel"] as List<Blog.ViewModel.System.Carousel.CarouselVm>;
 }
 
 
 
 <main>
     <div class="carousel max-h-screen">
-  <div id="slide1" class="carousel-item relative w-full">
-    <img src="/thumbnail/bloga15.jpeg" class="w-full object-cover" />
-    <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-      <a href="#slide4" class="btn btn-circle">❮</a> 
-      <a href="#slide2" class="btn btn-circle">❯</a>
-    </div>
-  </div> 
-  <div id="slide2" class="carousel-item relative w-full">
-    <img src="/thumbnail/Gallery-6.jpg" class="w-full object-cover" />
-    <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-      <a href="#slide1" class="btn btn-circle">❮</a> 
-      <a href="#slide3" class="btn btn-circle">❯</a>
-    </div>
-  </div> 
-  <div id="slide3" class="carousel-item relative w-full">
-    <img src="/thumbnail/bloga11.webp" class="w-full object-cover" />
-    <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-      <a href="#slide2" class="btn btn-circle">❮</a> 
-      <a href="#slide4" class="btn btn-circle">❯</a>
-    </div>
-  </div> 
-</div>
-
-<div class="w-[90%] mx-auto mt-4">
-    <div>
-        <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center items-center">
-        <div class="w-full h-[300px] relative">
-            <img src="/thumbnail/Gallery-6.jpg" class="w-full" />
-            <div class="absolute top-0 bg-neutral opacity-90 duration-300">
-                <a asp-action="" class="p-2 text-base-100 text-2xl hover:text-primary duration-300">Fashion Style</a>
-            </div>
-        </div>
-        <div class="w-full h-[300px] relative">
-            <img src="/thumbnail/Gallery-6.jpg" class="w-full" />
-            <div class="absolute top-0 bg-neutral opacity-90 duration-300">
-                <a asp-action="" class="p-2 text-base-100 text-2xl hover:text-primary duration-300">Fashion Style</a>
-            </div>
-        </div>
-        <div class="w-full h-[300px] relative">
-            <img src="/thumbnail/Gallery-6.jpg" class="w-full" />
-            <div class="absolute top-0 bg-neutral opacity-90 duration-300">
-                <a asp-action="" class="p-2 text-base-100 text-2xl hover:text-primary duration-300">Fashion Style</a>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <div class="divider font-bold text-2xl "></div> 
-
-    <div class="content flex space-x-[2rem]">
-        <div class="space-y-[2rem]">
-            <h1 class="text-neutral font-semibold text-3xl">Bài Viết Mới Nhất</h1>
-            <hr class="my-[2rem]" />
-            @foreach (var item in listLatestPost)
-            {
-                <div class="flex flex-col lg:flex-row gap-10">
-                <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug">
-                    <img src="/thumbnail/@item.Thumbnail" class="w-full max-w-[400] lg:min-w-[400px] rounded-sm h-[250px] hover:cursor-pointer hover:opacity-90 duration-300"/>
-                </a>
-                <div class="flex flex-col h-[300px]">
-                    <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug" class="text-xl my-2 font-bold text-neutral">@item.Title</a>
-                    <h4 class="text-md my-2 font-medium text-base-300 ">@item.CategoryName / @item.CreatedAt</h4>
-                    <p class="text-lg my-2 font-medium text-base-content">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
+        @foreach (var item in listCarousel)
+        {
+                int prevSortOrder = item.SortOrder - 1;
+                int nextSortOrder = item.SortOrder + 1;
+            <div id="@item.SortOrder" class="carousel-item relative w-full">
+                <img src="/thumbnail/@item.Url" class="w-full object-cover" alt="@item.Name" />
+                <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                    <a href="#@nextSortOrder" class="btn btn-circle">❮</a>
+                    <a href="#@prevSortOrder" class="btn btn-circle">❯</a>
                 </div>
             </div>
-            }
-        </div>
-        @await Html.PartialAsync("_MostViewPost", listMostView)
+        }
     </div>
-</div>
+
+    <div class="w-[90%] mx-auto mt-4">
+        <div>
+            <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center items-center">
+                <div class="w-full h-[300px] relative">
+                    <img src="/thumbnail/Gallery-6.jpg" class="w-full" />
+                    <div class="absolute top-0 bg-neutral opacity-90 duration-300">
+                        <a asp-action="" class="p-2 text-base-100 text-2xl hover:text-primary duration-300">Fashion Style</a>
+                    </div>
+                </div>
+                <div class="w-full h-[300px] relative">
+                    <img src="/thumbnail/Gallery-6.jpg" class="w-full" />
+                    <div class="absolute top-0 bg-neutral opacity-90 duration-300">
+                        <a asp-action="" class="p-2 text-base-100 text-2xl hover:text-primary duration-300">Fashion Style</a>
+                    </div>
+                </div>
+                <div class="w-full h-[300px] relative">
+                    <img src="/thumbnail/Gallery-6.jpg" class="w-full" />
+                    <div class="absolute top-0 bg-neutral opacity-90 duration-300">
+                        <a asp-action="" class="p-2 text-base-100 text-2xl hover:text-primary duration-300">Fashion Style</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider font-bold text-2xl "></div>
+
+        <div class="content flex space-x-[2rem]">
+            <div class="space-y-[2rem]">
+                <h1 class="text-neutral font-semibold text-3xl">Bài Viết Mới Nhất</h1>
+                <hr class="my-[2rem]" />
+                @foreach (var item in listLatestPost)
+                {
+                    <div class="flex flex-col lg:flex-row gap-10">
+                        <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug">
+                            <img src="/thumbnail/@item.Thumbnail" class="w-full max-w-[400] lg:min-w-[400px] rounded-sm h-[250px] hover:cursor-pointer hover:opacity-90 duration-300" />
+                        </a>
+                        <div class="flex flex-col h-[300px]">
+                            <a asp-action="Index" asp-controller="Blog" asp-route-slug="@item.Slug" class="text-xl my-2 font-bold text-neutral">@item.Title</a>
+                            <h4 class="text-md my-2 font-medium text-base-300 ">@item.CategoryName / @item.CreatedAt</h4>
+                            <p class="text-lg my-2 font-medium text-base-content">Lorem ipsum dolor sit amet consectetur adipiscing elit. Phasellus dignissim purus facilisis libero suscipit vulputate.Vestibulum rutrum...</p>
+                        </div>
+                    </div>
+                }
+            </div>
+            @await Html.PartialAsync("_MostViewPost", listMostView)
+        </div>
+    </div>
 </main>

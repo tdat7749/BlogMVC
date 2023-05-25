@@ -1,0 +1,117 @@
+﻿@model Blog.ViewModel.System.Carousel.CarouselVm
+@{
+    ViewData["Title"] = "Admin - Tạo Danh Mục";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Tạo Mới Carousel</h1>
+
+<hr/>
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"><span class="text-danger">*  </span>Tiêu Đề</label>
+        <input asp-for="Name" class="form-control" id="name" />
+    </div>
+    <div class="form-group">
+        <label asp-for="SortOrder" class="control-label"><span class="text-danger">*  </span>Thứ Tự Xuất Hiện</label>
+        <input type="number" asp-for="SortOrder" class="form-control" id="sortOrder" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Url" class="control-label"><span class="text-danger">*  </span>Hình Ảnh</label>
+        <input asp-for="Url" class="form-control" id="url" type="file" onchange="onChangeImage(event)" />
+
+            <img src="#" alt="thumbnail" id="previewThumbnail" class="w-25 h-25 object-fit-cover"/>
+    </div>
+    <div class="form-group">
+        <button onclick="createCarousel(event)" class="btn btn-primary">Tạo Mới</button>
+    </div>
+</form>
+<div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Quay Lại Danh Sách</a>
+</div>
+
+@section AdminScripts{
+
+    <script>
+        function onChangeImage(e){
+            const file = e.target.files[0]
+            if(file && file.type.includes('image/')){
+                var reader = new FileReader()
+
+                reader.onload = function(e) {
+                    $("#previewThumbnail").attr('src', e.target.result);
+
+                }
+                reader.readAsDataURL(file);
+                return;
+            }
+            $("#previewThumbnail").attr('src','#');
+            swal.fire({
+                title:"Lỗi",
+                icon:"error",
+                text:"File/Hình ảnh không tồn tại"
+            })
+        }
+
+        function createCarousel(e) {
+            e.preventDefault()
+            const name = $("#name").val().trim()
+            const sortOrder = parseInt($("#sortOrder").val())
+            const url = $("#url").prop("files")[0]
+
+
+            if (name === "" || sortOrder === null|| url === undefined) {
+                swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng không để trống những ô nhập có dấu *",
+                    icon: "error"
+                })
+                return;
+            }
+
+            var formData = new FormData()
+            formData.append('name',name)
+            formData.append('sortOrder',sortOrder)
+            formData.append('url',url)
+
+
+
+            swal.fire({
+                title: 'Tạo Carousel',
+                text:'Bạn có chắc chắn muốn tạo ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Chắc chắn ',
+                cancelButtonText: 'Không',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        enctype: 'multipart/form-data',
+                        url: "@Url.Action("CreateCarousel","Carousel",new {Area = "Admin"})",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function(response) {
+                            if (response.success === true) {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'success',
+                                }).then(result => {
+                                    window.location = "@Url.Action("Index","Carousel",new {Area = "Admin"})"
+                                })
+
+                            } else {
+                                swal.fire({
+                                    title: response.message,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    </script>
+}

@@ -1,4 +1,5 @@
-﻿using Blog.ViewModel.Common;
+﻿using Blog.Data.Entities;
+using Blog.ViewModel.Common;
 using Blog.ViewModel.System.Carousel;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace Blog.Application.System.CarouselService
         Task<JsonResponse> UpdateCarousel(UpdateCarouselModel model);
         Task<JsonResponse> UpdateCarouselStatus(UpdateCarouselStatusModel model);
         Task<JsonResponse> DeleteCarouse(int id);
+
+        Task<Carousel> GetCarousel(int id);
 
 
 

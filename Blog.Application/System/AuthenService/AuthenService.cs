@@ -29,6 +29,47 @@ namespace Blog.Application.System.AuthenService
             _emailSender = emailSender;
         }
 
+        public async Task<JsonResponse> ForgotPassword(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Tài khoản với địa chỉ email : {email} không tồn tại",
+                        Success = false
+                    };
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                if (String.IsNullOrEmpty(token))
+                {
+                    return new JsonResponse()
+                    {
+                        Message = $"Có lỗi xảy ra",
+                        Success = false
+                    };
+                }
+                await _emailSender.SendEmailAsync(email, "Quên Mật Khẩu", $"Xin chào {email}, <br/> Đây là token sử dụng để thay đổi mật khẩu của bạn, token này chỉ sử dụng được một lần và vui lòng không chia sẻ cho bất kì ai <br/> <strong>{token}</strong>");
+
+                return new JsonResponse()
+                {
+                    Message = $"Một tin nhắn đã được gửi tới email của bạn, vui lòng kiểm tra.!",
+                    Success = true
+                };
+            }
+            catch (Exception)
+            {
+                return new JsonResponse()
+                {
+                    Message = $"Có lỗi xảy ra",
+                    Success = false
+                };
+            }
+        }
+
         public async Task<JsonResponse> Login(LoginModel model)
         {
             try
@@ -147,6 +188,7 @@ namespace Blog.Application.System.AuthenService
                 PhoneNumber = model.PhoneNumber,
             };
 
+            await _userManager.AddToRoleAsync(newUser, "Thành Viên");
             var user = await _userManager.CreateAsync(newUser,model.Password);
             if (!user.Succeeded)
             {

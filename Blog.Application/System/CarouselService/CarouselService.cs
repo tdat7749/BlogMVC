@@ -14,8 +14,8 @@ namespace Blog.Application.System.CarouselService
 {
     public class CarouselService : ICarouselService
     {
-        private IFileStorageService _fileStorageService;
-        private BlogDbContext _context;
+        private readonly IFileStorageService _fileStorageService;
+        private readonly BlogDbContext _context;
         public CarouselService(IFileStorageService fileStorageService,BlogDbContext context)
         {
             _fileStorageService = fileStorageService;
@@ -72,6 +72,7 @@ namespace Blog.Application.System.CarouselService
                     };
                 }
 
+                _fileStorageService.DeleteThumbnail(carousel.Url);
                 _context.Carousels.Remove(carousel);
                 await _context.SaveChangesAsync();
 
@@ -92,9 +93,59 @@ namespace Blog.Application.System.CarouselService
 
         }
 
-        public Task<PagingResponse<List<CarouselVm>>> GetAllCarousel(PagingRequest request)
+        public async Task<PagingResponse<List<CarouselVm>>> GetAllCarousel(PagingRequest request)
         {
-            throw new NotImplementedException();
+            int TotalPage, TotalRecord;
+            var query = from c in _context.Carousels
+                        select c;
+
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(request.Keyword));
+            }
+
+            TotalRecord = query.Count();
+
+            query = query.Skip(request.PageSize * (request.PageIndex - 1)).Take(request.PageSize);
+
+
+            TotalPage = (int)Math.Ceiling((double)TotalRecord / request.PageSize);
+
+            var result = await query.Select(x => new CarouselVm()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Url = x.Url,
+                SortOrder = x.SortOrder,
+                Status = x.Status
+            }).ToListAsync();
+
+            return new PagingResponse<List<CarouselVm>>()
+            {
+                Data = result,
+                TotalPage = TotalPage,
+                TotalRecord = TotalRecord
+            };
+        }
+
+        public async Task<Carousel> GetCarousel(int id)
+        {
+            try
+            {
+                var carousel = await _context.Carousels.FindAsync(id);
+
+                if (carousel == null)
+                {
+                    return null;
+                }
+
+                return carousel;
+            }
+            catch (Exception)
+            {
+                throw new Exception();
+            }
         }
 
         public async Task<List<CarouselVm>> GetPublicCarousel()
@@ -111,7 +162,7 @@ namespace Blog.Application.System.CarouselService
                     SortOrder = x.SortOrder,
                     Name = x.Name,
                     Url = x.Url,
-                    Status = x.Status.ToString(),
+                    Status = x.Status,
                     CreatedAt = x.CreatedAt
                 }).OrderByDescending(x => x.SortOrder).ToListAsync();
 
@@ -145,6 +196,7 @@ namespace Blog.Application.System.CarouselService
 
                 if(model.Url != null)
                 {
+                    _fileStorageService.DeleteThumbnail(carousel.Url);
                     carousel.Url = await _fileStorageService.SaveThumbnailAsync(model.Url, model.Name);
                 }
 

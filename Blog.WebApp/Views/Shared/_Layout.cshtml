@@ -98,7 +98,7 @@
                     <span class="font-medium text-2xl text-neutral">Danh Mục</span>
                     @foreach (var item in categories)
                     {
-                        <a class="text-lg text-neutral font-semibold hover:cursor-pointer hover:opacity-90 asp-action="Category" asp-controller="Search" asp-route-slug="@item.Slug">@item.Name</a>
+                        <a class="text-lg text-neutral font-semibold hover:cursor-pointer hover:opacity-90" asp-action="Category" asp-controller="Search" asp-route-slug="@item.Slug">@item.Name</a>
                     }
                 </div>
                 <div class="flex space-y-10 flex-col">

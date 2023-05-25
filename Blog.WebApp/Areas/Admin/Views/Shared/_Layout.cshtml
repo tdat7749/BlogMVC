@@ -128,6 +128,22 @@
                 </div>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="/#" data-toggle="collapse" data-target="#collapseCarousel"
+                    aria-expanded="true" aria-controls="collapseCarousel">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Quản lý Carousel</span>
+                </a>
+                <div id="collapseCarousel" class="collapse" aria-labelledby="headingCarousel"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Chức Năng:</h6>
+                        <a class="collapse-item" href="@Url.Action("Index","Carousel", new {Area = "Admin"})">Danh Sách Carousel</a>
+                        <a class="collapse-item" href="@Url.Action("Create","Carousel", new {Area = "Admin"})">Tạo Mới Carousel</a>
+                    </div>
+                </div>
+            </li>
+
             <!-- Divider -->
             <hr class="sidebar-divider">
 

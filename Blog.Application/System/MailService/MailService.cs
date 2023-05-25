@@ -8,7 +8,7 @@ namespace Blog.Application.System.MailService
 {
     public class MailSettings
     {
-        public string Mail { get; set; }
+        public string UserName { get; set; }
         public string DisplayName { get; set; }
         public string Password { get; set; }
         public string Host { get; set; }
@@ -30,8 +30,8 @@ namespace Blog.Application.System.MailService
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             var message = new MimeMessage();
-            message.Sender = new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail);
-            message.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
+            message.Sender = new MailboxAddress(_mailSettings.DisplayName, _mailSettings.UserName);
+            message.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.UserName));
 
             message.To.Add(MailboxAddress.Parse(email));
             message.Subject = subject;
@@ -45,7 +45,7 @@ namespace Blog.Application.System.MailService
             try
             {
                 smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-                smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
+                smtp.Authenticate(_mailSettings.UserName, _mailSettings.Password);
                 await smtp.SendAsync(message);
             }
             catch (Exception ex)

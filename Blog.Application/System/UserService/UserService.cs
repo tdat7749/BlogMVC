@@ -322,8 +322,24 @@ namespace Blog.Application.System.UserService
 
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
-                user.Email = model.Email;
                 user.PhoneNumber = model.PhoneNumber;
+
+                if(user.Email.ToLower() != model.Email.ToLower())
+                {
+                    var token = await _userManager.GenerateChangeEmailTokenAsync(user, model.Email);
+
+                    var changeEmail = await _userManager.ChangeEmailAsync(user, model.Email, token);
+                    
+                    if (!changeEmail.Succeeded)
+                    {
+                        return new JsonResponse()
+                        {
+                            Message = "Có lỗi xảy ra, thay đổi email thất bại",
+                            Success = false
+                        };
+                    }
+                    user.NormalizedEmail = model.Email.ToUpper();
+                }
 
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
